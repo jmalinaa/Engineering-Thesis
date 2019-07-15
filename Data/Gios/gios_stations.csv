@@ -1,0 +1,4 @@
+id,address,city,latitude,longitude,manufacturer,source,uuid
+gios_bujaka         ,"Kraków, ul. Bujaka                                                                                  ",Kraków              ,50.010575,19.949189,gios                ,gios      ,MpKrakBujaka        
+gios_bulwarowa      ,"Kraków, ul. Bulwarowa                                                                               ",Kraków              ,50.069308,20.053492,gios                ,gios      ,MpKrakBulwar        
+gios_krasinskiego   ,"Kraków, al. Krasińskiego                                                                            ",Kraków              ,50.057678,19.926189,gios                ,gios      ,MpKrakAlKras        
