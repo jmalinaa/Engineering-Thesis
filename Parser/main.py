@@ -8,7 +8,7 @@ while not 1 <= filetype <= 3:
           "3. IMGW \n")
     filetype = int(input())
 
-print("Enter absolute path of file: \n")
+print("Enter absolute path of file using double backslashes: \n")
 filepath = input()
 
 if filetype == 1:
@@ -19,7 +19,7 @@ elif filetype == 2:
 
 elif filetype == 3:
     datatype = 0
-    while not 1 <= datatype <= 3:
+    while not 1 <= datatype <= 4:
         print("Enter number of type of data you want to insert into database: \n"
               "1. Temperature (B00300S) \n"
               "2. Wind speed (B00702A) \n"

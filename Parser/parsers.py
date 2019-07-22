@@ -18,9 +18,11 @@ add_pollution = ("INSERT INTO pollution (measurement_id, pollution_dict_id, meas
 
 add_weather = ("INSERT INTO weather (measurement_id, weather_dict_id, measurement_value) VALUES (%s, %s, %s)")
 
+find_measurement = ("SELECT measurement_id FROM measurement WHERE station_id = (%s) and time_utc = (DATE_FORMAT(%s, '%Y-%m-%d %H:%i:%S'))")
+
+
 
 def gios(filepath):
-    # filename = 'C:\\Users\\jjanm\\Documents\\Studia\\Inżynierka\\air_quality\\gios_observations_2012_2018.csv'
     with open(filepath, mode='r') as csv_file:
         csv_reader = csv.DictReader(csv_file)
         for row in csv_reader:
@@ -61,7 +63,6 @@ def gios(filepath):
 
 
 def airly(filepath):
-    # filename = 'C:\\Users\\jjanm\\Documents\\Studia\\Inżynierka\\air_quality\\airly_observations_2017.csv'
     with open(filepath, mode='r') as csv_file:
         csv_reader = csv.DictReader(csv_file)
         for row in csv_reader:
@@ -115,7 +116,6 @@ def airly(filepath):
 
 
 def imgw(filepath, type):
-    # filename = 'C:\\Users\\jjanm\\Documents\\Studia\\Inżynierka\\Meteo_2017-01\\B00202A_2017_01.csv'
     with open(filepath, mode='r') as csv_file:
         csv_reader = csv.DictReader(csv_file, delimiter=';')
         for row in csv_reader:
@@ -130,14 +130,24 @@ def imgw(filepath, type):
             if is_station:
                 time = row['utc_time']
                 datetime = dateutil.parser.parse(time)
-                data_measurement = (station_id, str(datetime))
-                cursor.execute(add_measurement, data_measurement)
-                mid = cursor.lastrowid
+
+                data_find_measurement = (station_id, str(datetime))
+                cursor.execute(find_measurement, data_find_measurement)
+                records = cursor.fetchall()
+
+                if cursor.rowcount == 0:
+                    data_measurement = (station_id, str(datetime))
+                    cursor.execute(add_measurement, data_measurement)
+                    mid = cursor.lastrowid
+
+                elif cursor.rowcount == 1:
+                    for record in records:
+                        mid = record[0]
 
                 val = row['value']
                 if val != '':
-                    val = float(val)
-                    data_weather = (mid, type, val)
+                    v = val.replace(",", ".")
+                    data_weather = (mid, type, v)
                     cursor.execute(add_weather, data_weather)
             cnx.commit()
         cursor.close()
