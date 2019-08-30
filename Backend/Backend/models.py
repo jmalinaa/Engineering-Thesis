@@ -67,3 +67,145 @@ class Weather(models.Model):
     class Meta:
         managed = False
         db_table = 'weather'
+
+
+class CheapStations(models.Model):
+    station_id = models.IntegerField()
+    latitude = models.FloatField()
+    longitude = models.FloatField()
+    station_name = models.CharField(max_length=45, blank=True, null=True)
+
+    class Meta:
+        managed = False  # Created from a view. Don't remove.
+        db_table = 'cheap_stations'
+
+
+class GoodStations(models.Model):
+    station_id = models.IntegerField()
+    latitude = models.FloatField()
+    longitude = models.FloatField()
+    station_name = models.CharField(max_length=45, blank=True, null=True)
+
+    class Meta:
+        managed = False  # Created from a view. Don't remove.
+        db_table = 'good_stations'
+
+
+class Humidity(models.Model):
+    measurement_id = models.IntegerField()
+    measurement_value = models.FloatField(blank=True, null=True)
+    component_name = models.CharField(max_length=45)
+
+    class Meta:
+        managed = False  # Created from a view. Don't remove.
+        db_table = 'humidity'
+
+# VIEWS:
+
+class MeasurementsWithNames(models.Model):
+    pollution_id = models.IntegerField()
+    measurement_id = models.IntegerField()
+    measurement_value = models.FloatField(blank=True, null=True)
+    pollution_name = models.CharField(max_length=45)
+
+    class Meta:
+        managed = False  # Created from a view. Don't remove.
+        db_table = 'measurements_with_names'
+
+
+class PollutionAndWeather(models.Model):
+    station_id = models.IntegerField()
+    time_utc = models.DateTimeField()
+    pollution_value = models.FloatField(blank=True, null=True)
+    pollution_name = models.CharField(max_length=45)
+    weather_value = models.FloatField(blank=True, null=True)
+    component_name = models.CharField(max_length=45)
+
+    class Meta:
+        managed = False  # Created from a view. Don't remove.
+        db_table = 'pollution_and_weather'
+
+
+class PollutionAndWeatherCompact(models.Model):
+    station_id = models.IntegerField()
+    measurement_id = models.IntegerField()
+    time_utc = models.DateTimeField()
+    value = models.FloatField(blank=True, null=True)
+    component_name = models.CharField(max_length=45)
+
+    class Meta:
+        managed = False  # Created from a view. Don't remove.
+        db_table = 'pollution_and_weather_compact'
+
+
+class Pressure(models.Model):
+    measurement_id = models.IntegerField()
+    measurement_value = models.FloatField(blank=True, null=True)
+    component_name = models.CharField(max_length=45)
+
+    class Meta:
+        managed = False  # Created from a view. Don't remove.
+        db_table = 'pressure'
+
+
+class StationMeasurements(models.Model):
+    station_id = models.IntegerField()
+    measurement_id = models.IntegerField()
+    time_utc = models.DateTimeField()
+
+    class Meta:
+        managed = False  # Created from a view. Don't remove.
+        db_table = 'station_measurements'
+
+
+class StationMeasurementsWithData(models.Model):
+    station_id = models.IntegerField()
+    measurement_id = models.IntegerField()
+    time_utc = models.DateTimeField()
+    pollution_name = models.CharField(max_length=45)
+    measurement_value = models.FloatField(blank=True, null=True)
+
+    class Meta:
+        managed = False  # Created from a view. Don't remove.
+        db_table = 'station_measurements_with_data'
+
+
+class Temperature(models.Model):
+    measurement_id = models.IntegerField()
+    measurement_value = models.FloatField(blank=True, null=True)
+    component_name = models.CharField(max_length=45)
+
+    class Meta:
+        managed = False  # Created from a view. Don't remove.
+        db_table = 'temperature'
+
+
+class WeatherMeasurementData(models.Model):
+    station_id = models.IntegerField()
+    measurement_id = models.IntegerField()
+    measurement_value = models.FloatField(blank=True, null=True)
+    component_name = models.CharField(max_length=45)
+
+    class Meta:
+        managed = False  # Created from a view. Don't remove.
+        db_table = 'weather_measurement_data'
+
+
+class WindDirection(models.Model):
+    measurement_id = models.IntegerField()
+    measurement_value = models.FloatField(blank=True, null=True)
+    component_name = models.CharField(max_length=45)
+
+    class Meta:
+        managed = False  # Created from a view. Don't remove.
+        db_table = 'wind_direction'
+
+
+class WindSpeed(models.Model):
+    measurement_id = models.IntegerField()
+    measurement_value = models.FloatField(blank=True, null=True)
+    component_name = models.CharField(max_length=45)
+
+    class Meta:
+        managed = False  # Created from a view. Don't remove.
+        db_table = 'wind_speed'

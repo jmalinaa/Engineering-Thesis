@@ -21,5 +21,6 @@ from .views import *
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('stations/', stations),
-    path('dataflair/', index),
+    path('stations_within_radius/', stations_within_radius),
+    path('station_within_radius_from_coords/', station_within_radius_from_coords),
 ]
