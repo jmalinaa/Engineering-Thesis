@@ -10,8 +10,20 @@ default_radius = 50.0
 
 
 def stations(request):
-    all_stations = Station.objects.all()
-    data = serializers.serialize('json', all_stations)
+    stations = Station.objects.all()
+    data = serializers.serialize('json', stations)
+    return JsonResponse(data, safe=False)
+
+
+def good_stations(request):
+    stations = GoodStations.objects.all()
+    data = serializers.serialize('json', stations)
+    return JsonResponse(data, safe=False)
+
+
+def cheap_stations(request):
+    stations = CheapStations.objects.all()
+    data = serializers.serialize('json', stations)
     return JsonResponse(data, safe=False)
 
 
@@ -31,8 +43,8 @@ def stations_within_radius(request):
         result_set = cursor.fetchall()
     finally:
         cursor.close()
-    #data = serializers.serialize('json', result_set, fields=['station_id', 'latitude', 'longitude', 'distance_meters'])
-    #return JsonResponse(data, safe=False)
+    # data = serializers.serialize('json', result_set, fields=['station_id', 'latitude', 'longitude', 'distance_meters'])
+    # return JsonResponse(data, safe=False)
     # Serializers are used to serialize the django models only. To serialize simple python data use the built-in json module:
     return JsonResponse(json.dumps(result_set), safe=False)
 
@@ -55,4 +67,24 @@ def station_within_radius_from_coords(request):
     finally:
         cursor.close()
     return JsonResponse(json.dumps(result_set), safe=False)
+
+
+def station_measurements_with_data(request):
+    measurements = StationMeasurementsWithData2.objects.all()
+    data = serializers.serialize('json', measurements)
+    return JsonResponse(data, safe=False)
+
+
+def pollution_and_weather_compact(request):
+    measurements = PollutionAndWeatherCompact.objects.all()
+    data = serializers.serialize('json', measurements)
+    return JsonResponse(data, safe=False)
+
+
+def weather_measurement_data(request):
+    measurements = WeatherMeasurementData.objects.all()
+    data = serializers.serialize('json', measurements)
+    return JsonResponse(data, safe=False)
+
+
 

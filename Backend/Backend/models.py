@@ -100,6 +100,7 @@ class Humidity(models.Model):
         managed = False  # Created from a view. Don't remove.
         db_table = 'humidity'
 
+
 # VIEWS:
 
 class MeasurementsWithNames(models.Model):
@@ -159,6 +160,7 @@ class StationMeasurements(models.Model):
 
 
 class StationMeasurementsWithData(models.Model):
+    id = models.AutoField(primary_key=True)
     station_id = models.IntegerField()
     measurement_id = models.IntegerField()
     time_utc = models.DateTimeField()
@@ -168,6 +170,19 @@ class StationMeasurementsWithData(models.Model):
     class Meta:
         managed = False  # Created from a view. Don't remove.
         db_table = 'station_measurements_with_data'
+
+
+class StationMeasurementsWithData2(models.Model):
+    station_id = models.IntegerField()
+    measurement_id = models.IntegerField()
+    time_utc = models.DateTimeField()
+    pollution_name = models.CharField(max_length=45)
+    measurement_value = models.FloatField(blank=True, null=True)
+    rowhash = models.CharField(max_length=32, blank=True, primary_key=True)
+
+    class Meta:
+        managed = False  # Created from a view. Don't remove.
+        db_table = 'station_measurements_with_data2'
 
 
 class Temperature(models.Model):

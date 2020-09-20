@@ -21,6 +21,10 @@ from .views import *
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('stations/', stations),
+    path('good_stations/', good_stations),
     path('stations_within_radius/', stations_within_radius),
     path('station_within_radius_from_coords/', station_within_radius_from_coords),
+    path('station_measurements_with_data/', station_measurements_with_data),
+    path('pollution_and_weather_compact/', pollution_and_weather_compact),
+    path('weather_measurement_data/', weather_measurement_data)
 ]
