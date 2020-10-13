@@ -4,6 +4,10 @@ This project was bootstrapped with [Create React App](https://github.com/faceboo
 
 Install node.js from https://nodejs.org/en/
 
+### Dependencies installation
+
+`npm install  @material-ui/core`
+
 ## Available Scripts
 
 In the project directory, you can run:
