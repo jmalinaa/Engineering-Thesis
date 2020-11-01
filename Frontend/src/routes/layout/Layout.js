@@ -10,6 +10,7 @@ import ListItemIcon from '@material-ui/core/ListItemIcon';
 import InboxIcon from '@material-ui/icons/MoveToInbox';
 import MailIcon from '@material-ui/icons/Mail';
 import Container from '@material-ui/core/Container';
+import Box from '@material-ui/core/Box';
 
 function Layout(props) {
 
@@ -25,36 +26,31 @@ function Layout(props) {
   };
 
   return (
-    <div>
-      <div >
-        <AppBar
-          position="fixed"
-        >
-          <Toolbar>
-            <IconButton
-              color="inherit"
-              aria-label="open drawer"
-              onClick={handleDrawerOpen}
-              edge="start"
-            >
-              <MenuIcon />
-            </IconButton>
-            <Typography variant="h6" noWrap>
-              Kalibrator
+    <React.Fragment>
+      <AppBar
+        position="fixed"
+      >
+        <Toolbar>
+          <IconButton
+            color="inherit"
+            aria-label="open drawer"
+            onClick={handleDrawerOpen}
+            edge="start"
+          >
+            <MenuIcon />
+          </IconButton>
+          <Typography variant="h6" noWrap>
+            Kalibrator
             </Typography>
-          </Toolbar>
-        </AppBar>
-        <Toolbar /> {/* Ten toolbar jest ważny - bez niego górny pasek przykrywa część strony */}
-        <Container>
+        </Toolbar>
+      </AppBar>
+      <Toolbar /> {/* Ten toolbar jest ważny - bez niego górny pasek przykrywa część strony */}
           <Sidebar open={open} handleDrawerClose={handleDrawerClose} />
-          <div style={{ maxWidth: '800px' }}>
+          <div>
             {props.children}
           </div>
-        </Container>
 
-      </div>
-
-    </div>
+    </React.Fragment>
   )
 }
 

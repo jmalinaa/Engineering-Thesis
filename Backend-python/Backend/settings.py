@@ -78,9 +78,13 @@ WSGI_APPLICATION = 'Backend.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'airpollution',
-        'USER': 'Karol',
-        'HOST': '35.189.123.186',
+        # 'NAME': 'airpollution',
+        'NAME': 'malina',
+        # 'USER': 'Karol',
+        'USER': 'malina',
+        'PASSWORD': '8gPGN7HkUnsBDKdU',
+        # 'HOST': '35.189.123.186',
+        'HOST': 'mysql.agh.edu.pl',
         'PORT': '3306'
     }
 }
