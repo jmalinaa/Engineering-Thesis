@@ -12,6 +12,8 @@ import ListItemText from '@material-ui/core/ListItemText';
 
 import { Link } from "react-router-dom";
 
+import PropTypes from 'prop-types';
+
 function Sidebar(props) {
 
     console.log("Sidebar, props: ", props);
@@ -52,6 +54,10 @@ function Sidebar(props) {
         </div>
 
     );
+}
+
+Sidebar.propTypes = {
+    handleDrawerClose: PropTypes.func.isRequired
 }
 
 export default Sidebar;
