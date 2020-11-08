@@ -1,6 +1,6 @@
 import { BASE_PATH } from "./paths";
 
-export default function GET(relativePath, onSuccess, onError) {
+export default async function GET(relativePath, onSuccess, onError) {
 
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
@@ -11,7 +11,10 @@ export default function GET(relativePath, onSuccess, onError) {
         cache: 'default'
     };
 
-    fetch(BASE_PATH + relativePath, init)
-        .then(onSuccess())
-        .catch(onError());
+    // let response = await fetch(BASE_PATH + relativePath, init)
+    // let json = await response.json;
+    // return json;
+    fetch(BASE_PATH + relativePath)
+        .then((response) => onSuccess(response))
+        .then(data => console.log("GET, data:", data))
 }

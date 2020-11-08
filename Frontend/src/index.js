@@ -6,9 +6,7 @@ import Routes from "./routes"
 import * as serviceWorker from './serviceWorker';
 
 ReactDOM.render(
-  <React.StrictMode>
-    <Routes />
-  </React.StrictMode>,
+    <Routes />,
   document.getElementById('root')
 );
 
