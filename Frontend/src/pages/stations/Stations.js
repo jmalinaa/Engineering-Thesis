@@ -61,7 +61,7 @@ function Stations({ location, props }) {
         { id: 'station_id', numeric: true, disablePadding: true, label: 'Identyfikator stacji' },
         { id: 'latitude', numeric: true, disablePadding: false, label: 'Szerokość geogr.' },
         { id: 'longitude', numeric: true, disablePadding: false, label: 'Długość geogr.' },
-        { id: 'station_name', numeric: true, disablePadding: false, label: 'Nazwa stacji' },
+        { id: 'station_name', numeric: false, disablePadding: false, label: 'Nazwa stacji' },
     ];
 
 
