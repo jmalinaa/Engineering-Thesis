@@ -10,8 +10,8 @@ default_radius = 50.0
 
 
 def stations(request):
-    all_stations = Station.objects.all()
-    data = serializers.serialize('json', all_stations)
+    all_stations = Station.objects.all().values()
+    data = list(all_stations)
     return JsonResponse(data, safe=False)
 
 

@@ -4,6 +4,7 @@
 - Microsoft C++ Build Tools: https://visualstudio.microsoft.com/visual-cpp-build-tools/
 - mysqlclient (`pip install mysqlclient`)
 - Django (`pip install django`)
+- Django CORS Headers (`pip install django-cors-headers`)
 
 ### Running backend
 `python manage.py runserver`
