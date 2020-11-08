@@ -1,8 +1,11 @@
 import React from 'react';
+import IconButton from '@material-ui/core/IconButton';
 import EnhancedTableHead from './enhancedTableHead';
 import PropTypes from 'prop-types';
 import clsx from 'clsx';
 import { lighten, makeStyles } from '@material-ui/core/styles';
+import { Redirect } from 'react-router-dom';
+import SubdirectoryArrowRightIcon from '@material-ui/icons/SubdirectoryArrowRight';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -10,6 +13,7 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TablePagination from '@material-ui/core/TablePagination';
 import TableRow from '@material-ui/core/TableRow';
 import Toolbar from '@material-ui/core/Toolbar';
+import Tooltip from '@material-ui/core/Tooltip';
 import Typography from '@material-ui/core/Typography';
 import Paper from '@material-ui/core/Paper';
 
@@ -60,24 +64,28 @@ const useToolbarStyles = makeStyles((theme) => ({
 }));
 
 const EnhancedTableToolbar = (props) => {
+
+  console.log("EnhancedTableToolbar, props:", props);
+
   const classes = useToolbarStyles();
-  const { numSelected } = props;
+  const { selected } = props;
 
   return (
     <Toolbar
       className={clsx(classes.root, {
-        [classes.highlight]: numSelected > 0,
+        [classes.highlight]: selected > 0,
       })}
     >
       <Typography className={classes.title} variant="h6" id="tableTitle" component="div">
         Stacje
       </Typography>
+      {props.children}
     </Toolbar>
   );
 };
 
 EnhancedTableToolbar.propTypes = {
-  numSelected: PropTypes.number.isRequired,
+  selected: PropTypes.number,
 };
 
 const useStyles = makeStyles((theme) => ({
@@ -104,16 +112,17 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export default function EnhancedTable({rows, ...props}) {
+export default function EnhancedTable({ rows, ...props }) {
   console.log("EnhancedTable, rows:", rows);
 
   const classes = useStyles();
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('calories');
-  const [selected, setSelected] = React.useState([]);
+  const [selectedIndex, setSelectedIndex] = React.useState(-1);
   const [page, setPage] = React.useState(0);
   const dense = true;
   const [rowsPerPage, setRowsPerPage] = React.useState(5);
+  const [triggerRedirection, setTriggerRedirection] = React.useState(false);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === 'asc';
@@ -121,33 +130,12 @@ export default function EnhancedTable({rows, ...props}) {
     setOrderBy(property);
   };
 
-  const handleSelectAllClick = (event) => {
-    if (event.target.checked) {
-      const newSelecteds = rows.map((n) => n.name);
-      setSelected(newSelecteds);
-      return;
-    }
-    setSelected([]);
-  };
-
-  const handleClick = (event, name) => {
-    const selectedIndex = selected.indexOf(name);
-    let newSelected = [];
-
-    if (selectedIndex === -1) {
-      newSelected = newSelected.concat(selected, name);
-    } else if (selectedIndex === 0) {
-      newSelected = newSelected.concat(selected.slice(1));
-    } else if (selectedIndex === selected.length - 1) {
-      newSelected = newSelected.concat(selected.slice(0, -1));
-    } else if (selectedIndex > 0) {
-      newSelected = newSelected.concat(
-        selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1),
-      );
-    }
-
-    setSelected(newSelected);
+  const handleClick = (event, newSelectedIndex) => {
+    if (newSelectedIndex == selectedIndex)
+      setSelectedIndex(-1);   //deselect
+    else
+      setSelectedIndex(newSelectedIndex)
+    console.log("EnhancedTable, newSelectedIndex, ", newSelectedIndex);
   };
 
   const handleChangePage = (event, newPage) => {
@@ -159,14 +147,35 @@ export default function EnhancedTable({rows, ...props}) {
     setPage(0);
   };
 
-  const isSelected = (name) => selected.indexOf(name) !== -1;
+  const isSelected = (index) => index === selectedIndex;
 
   const emptyRows = rowsPerPage - Math.min(rowsPerPage, rows.length - page * rowsPerPage);
+
+  function redirectToStation() {
+    console.log("EnhancedTable, redirectToStation");
+    if (triggerRedirection &&
+      rows != null &&
+      rows[selectedIndex] != null
+      && rows[selectedIndex].station_id != null)
+      return (<Redirect
+        to={`/station/${rows[selectedIndex].station_id}`}
+      />)
+    return null;
+  }
 
   return (
     <div className={classes.root}>
       <Paper className={classes.paper}>
-        <EnhancedTableToolbar numSelected={selected.length} />
+        <EnhancedTableToolbar selected={selectedIndex}>
+          <Tooltip title="Przejdź do stacji">
+            <span>
+              <IconButton onClick={() => setTriggerRedirection(true)} disabled={selectedIndex < 0}>
+              {redirectToStation()}
+              <SubdirectoryArrowRightIcon />
+            </IconButton>
+            </span>
+          </Tooltip>
+        </EnhancedTableToolbar>
         <TableContainer>
           <Table
             className={classes.table}
@@ -177,7 +186,6 @@ export default function EnhancedTable({rows, ...props}) {
             <EnhancedTableHead
               headCells={props.headCells}
               classes={classes}
-              numSelected={selected.length}
               order={order}
               orderBy={orderBy}
               onRequestSort={handleRequestSort}
@@ -187,17 +195,17 @@ export default function EnhancedTable({rows, ...props}) {
               {stableSort(rows, getComparator(order, orderBy))
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((row, index) => {
-                  const isItemSelected = isSelected(row.name);
+                  const isItemSelected = isSelected(index);
                   const labelId = `enhanced-table-checkbox-${index}`;
 
                   return (
                     <TableRow
                       hover
-                      onClick={(event) => handleClick(event, row.name)}
+                      onClick={(event) => handleClick(event, index)}
                       role="checkbox"
                       aria-checked={isItemSelected}
                       tabIndex={-1}
-                      key={row.station_id}
+                      key={index}
                       selected={isItemSelected}
                     >
                       <TableCell component="th" id={labelId} scope="row" padding="none">
