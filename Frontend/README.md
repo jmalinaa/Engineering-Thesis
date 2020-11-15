@@ -7,6 +7,7 @@ Install node.js from https://nodejs.org/en/
 ### Dependencies installation
 
 `npm install  @material-ui/core`
+`npm install @material-ui/lab`
 
 ## Available Scripts
 
