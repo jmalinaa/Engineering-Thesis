@@ -156,9 +156,9 @@ export default function EnhancedTable({ rows, ...props }) {
     if (triggerRedirection &&
       rows != null &&
       rows[selectedIndex] != null
-      && rows[selectedIndex].station_id != null)
+      && rows[selectedIndex].id != null)
       return (<Redirect
-        to={`/station/${rows[selectedIndex].station_id}`}
+        to={`/station/${rows[selectedIndex].id}`}
       />)
     return null;
   }
@@ -209,11 +209,11 @@ export default function EnhancedTable({ rows, ...props }) {
                       selected={isItemSelected}
                     >
                       <TableCell component="th" id={labelId} scope="row" padding="none">
-                        {row.station_id}
+                        {row.id}
                       </TableCell>
                       <TableCell align="left">{row.latitude}</TableCell>
                       <TableCell align="left">{row.longitude}</TableCell>
-                      <TableCell align="left">{row.station_name}</TableCell>
+                      <TableCell align="left">{row.stationName}</TableCell>
                     </TableRow>
                   );
                 })}

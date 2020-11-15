@@ -32,7 +32,7 @@ export default function Station(props) {
             setData(null);
         }
 
-        GET(STATION_PATH + "?station_id=" + stationId, onSuccess, onError);
+        GET(STATION_PATH + "/" + stationId, onSuccess, onError);
 
     }, [stationId]
     );
