@@ -40,12 +40,12 @@ function Sidebar(props) {
                     </Link> */}
                     <ListItem button key={"MainPage"}>
                         <Link to={"/"}>
-                            <ListItemText primary="Main Page" />
+                            <ListItemText primary="Strona główna" />
                         </Link>
                     </ListItem>
                     <ListItem button key={"Stations"}>
                         <Link to={"/stations"}>
-                            <ListItemText primary="Stations" />
+                            <ListItemText primary="Stacje" />
                         </Link>
                     </ListItem>
 
