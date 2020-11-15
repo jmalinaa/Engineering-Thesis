@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: engineering-thesis
+  profiles:
+    active: local
+  datasource:
+    url: jdbc:mysql://mysql.agh.edu.pl:3306/malina
+    username: malina
+    password: 8gPGN7HkUnsBDKdU
+  jpa:
+    database-platform: org.hibernate.dialect.MySQL8Dialect
+    show-sql: false
+    hibernate.ddl-auto: none
