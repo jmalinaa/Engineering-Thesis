@@ -15,14 +15,15 @@ import javax.persistence.*;
 public class Weather {
 
     @Id
-    @Column(name = "weather_id")
+    @GeneratedValue (strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
     @Column(name = "measurement_value")
     private Double measurementValue;
 
     @ManyToOne
-    @JoinColumn(name = "measurement_id", referencedColumnName = "measurement_id")
+    @JoinColumn(name = "measurement_id")
     private Measurement measurement;
 
     @ManyToOne

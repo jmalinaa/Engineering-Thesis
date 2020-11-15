@@ -29,7 +29,6 @@ public class JpaConfig {
     @Bean
     public DataSource dataSource() {
         DriverManagerDataSource driverManagerDataSource = new DriverManagerDataSource();
-        driverManagerDataSource.setDriverClassName("com.mysql.jdbc.Driver");
         driverManagerDataSource.setUrl(datasourceUrl);
         driverManagerDataSource.setUsername(username);
         driverManagerDataSource.setPassword(password);
@@ -57,7 +56,7 @@ public class JpaConfig {
         ps.put("hibernate.connection.characterEncoding", "UTF-8");
         ps.put("hibernate.connection.charSet", "UTF-8");
         ps.put(AvailableSettings.FORMAT_SQL, "true");
-        ps.put(AvailableSettings.DEFAULT_SCHEMA, "public");
+        ps.put(AvailableSettings.DEFAULT_SCHEMA, "malina");
         ps.put(AvailableSettings.SHOW_SQL, "true");
         return ps;
 

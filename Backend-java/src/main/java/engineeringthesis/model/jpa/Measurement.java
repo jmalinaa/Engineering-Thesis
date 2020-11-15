@@ -16,13 +16,14 @@ import java.util.Date;
 public class Measurement {
 
     @Id
-    @Column(name = "measurement_id")
+    @GeneratedValue (strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private Long id;
 
     @Column(name = "time_utc")
     private Date time;
 
     @ManyToOne
-    @JoinColumn(name = "station_id", referencedColumnName = "station_id")
+    @JoinColumn(name = "station_id")
     private Station station;
 }
