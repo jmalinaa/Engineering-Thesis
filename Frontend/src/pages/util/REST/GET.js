@@ -36,13 +36,16 @@ export default function GET(path, onSuccess, onError) {
         if (response == null)
             return null;
         const contentType = response.headers.get('content-type');
+        console.log("GET, getJson, contentType: ", contentType);
         if (!contentType || !contentType.includes('application/json')) {
             errorOccurred = true;
-            throw new TypeError("Oops, we haven't got JSON!");  //TODO test this!
+            throw new TypeError("Oops, we haven't got JSON!"); 
         }
         return response.json();
     }
 
+    //dzieki wrapperowi onSuccess nie wykonuje się gdy na przykład nie ma nagłówka application/json
+    //ale rzucenie wyjątku nie wystarczy, by wykonało isę onError!
     function onSuccessWrapper(json) {
         if(!errorOccurred)
             onSuccess(json)
@@ -50,7 +53,7 @@ export default function GET(path, onSuccess, onError) {
 
     fetch(path)
         .then(log)
-        .then(resolve.catch)
+        .then(resolve)
         .then(checkStatus)
         .then(getJson)
         .then(onSuccessWrapper)

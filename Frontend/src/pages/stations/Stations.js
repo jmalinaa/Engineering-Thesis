@@ -47,10 +47,10 @@ function Stations({ location, props }) {
     );
 
     const headCells = [
-        { id: 'station_id', numeric: true, disablePadding: true, label: 'Identyfikator stacji' },
+        { id: 'id', numeric: true, disablePadding: true, label: 'Identyfikator stacji' },
         { id: 'latitude', numeric: true, disablePadding: false, label: 'Szerokość geogr.' },
         { id: 'longitude', numeric: true, disablePadding: false, label: 'Długość geogr.' },
-        { id: 'station_name', numeric: false, disablePadding: false, label: 'Nazwa stacji' },
+        { id: 'stationName', numeric: false, disablePadding: false, label: 'Nazwa stacji' },
     ];
 
 
