@@ -222,7 +222,7 @@ export default function EnhancedTable({ rows, ...props }) {
                       </TableCell>
                       <TableCell align="left">{row.latitude}</TableCell>
                       <TableCell align="left">{row.longitude}</TableCell>
-                      <TableCell align="left">{row.stationName}</TableCell>
+                      <TableCell align="left">{row.name}</TableCell>
                     </TableRow>
                   );
                 })}
