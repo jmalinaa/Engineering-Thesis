@@ -36,11 +36,11 @@ export default function GET(path, onSuccess, onError) {
         if (response == null)
             return null;
         const contentType = response.headers.get('content-type');
-        console.log("GET, getJson, contentType: ", contentType);
-        if (!contentType || !contentType.includes('application/json')) {
-            errorOccurred = true;
-            throw new TypeError("Oops, we haven't got JSON!"); 
-        }
+        // console.log("GET, getJson, contentType: ", contentType);
+        // if (!contentType || !contentType.includes('application/json')) {
+        //     errorOccurred = true;
+        //     throw new TypeError("Oops, we haven't got JSON!"); 
+        // }
         return response.json();
     }
 

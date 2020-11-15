@@ -6,8 +6,14 @@ Install node.js from https://nodejs.org/en/
 
 ### Dependencies installation
 
+simply `npm i` to install dependencies
+or:
 `npm install  @material-ui/core`
 `npm install @material-ui/lab`
+`npm install xlsx`
+`npm install react-data-table-component`
+`npm install styled-components`
+`npm install --save react-csv-reader`
 
 ## Available Scripts
 
