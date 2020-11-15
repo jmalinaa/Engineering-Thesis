@@ -1,4 +1,5 @@
 import React from 'react';
+import AddIcon from '@material-ui/icons/Add';
 import IconButton from '@material-ui/core/IconButton';
 import EnhancedTableHead from './enhancedTableHead';
 import PropTypes from 'prop-types';
@@ -112,6 +113,9 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+
+//TODO UOGÓLNIĆ TĄ KLASĘ, nie moze być tak, że się zmieniają nagłówki czy nazwy pól i nagle się wyświetla niepoprawnie
+//bagłowki i nazwy pól danych muszą sobie odpowiadać itak też powinny być znajdowane, nie na sztywno
 export default function EnhancedTable({ rows, ...props }) {
   console.log("EnhancedTable, rows:", rows);
 
@@ -167,12 +171,17 @@ export default function EnhancedTable({ rows, ...props }) {
     <div className={classes.root}>
       <Paper className={classes.paper}>
         <EnhancedTableToolbar selected={selectedIndex}>
+          <Tooltip title="Dodan nową stację">
+            <IconButton onClick={props.addNewRowHandler}>
+              <AddIcon />
+            </IconButton>
+          </Tooltip>
           <Tooltip title="Przejdź do stacji">
             <span>
               <IconButton onClick={() => setTriggerRedirection(true)} disabled={selectedIndex < 0}>
-              {redirectToStation()}
-              <SubdirectoryArrowRightIcon />
-            </IconButton>
+                {redirectToStation()}
+                <SubdirectoryArrowRightIcon />
+              </IconButton>
             </span>
           </Tooltip>
         </EnhancedTableToolbar>

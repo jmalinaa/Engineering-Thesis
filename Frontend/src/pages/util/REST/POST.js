@@ -1,14 +1,14 @@
-export default function GET(path, onSuccess, onError) {
+export default function GET(path, data, onSuccess, onError) {
 
     let errorOccurred = false;
     let headers = new Headers();
     headers.append('Content-Type', 'application/json');
 
     const init = {
-        method: 'GET',
+        method: 'POST',
         headers: headers,
-        cache: 'default',
-        // mode: 'no-cors'
+        cache: 'no-cache',
+        body: JSON.stringify(data)
     };
 
     function log(promise) {
@@ -38,8 +38,7 @@ export default function GET(path, onSuccess, onError) {
         const contentType = response.headers.get('content-type');
         console.log("GET, getJson, contentType: ", contentType);
         if (!contentType || !contentType.includes('application/json')) {
-            errorOccurred = true;
-            throw new TypeError("Oops, we haven't got JSON!"); 
+            return null; 
         }
         return response.json();
     }
@@ -51,7 +50,7 @@ export default function GET(path, onSuccess, onError) {
             onSuccess(json)
     }
 
-    fetch(path)
+    fetch(path, init)
         .then(log)
         .then(resolve)
         .then(checkStatus)
