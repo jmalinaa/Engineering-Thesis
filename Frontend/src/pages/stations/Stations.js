@@ -5,8 +5,8 @@ import Grid from '@material-ui/core/Grid';
 import Paper from '@material-ui/core/Paper';
 import EnhancedTable from '../util/table'
 
-import { STATIONS_PATH } from "../util/REST/paths";
-import GET from "../util/REST/GET.js";
+import { ALL_STATIONS_PATH } from "../util/REST/paths";
+import GET from "../util/REST/GET";
 
 function Stations({ location, props }) {
 
@@ -29,31 +29,20 @@ function Stations({ location, props }) {
 
     const classes = useStyles();
 
-    function onError() {
-        console.log("Stations, fetch data error")
-    }
-
-    function resolve(promise) {
-        return Promise.resolve(promise);
-    }
-
-    function getJson(response) {
-        return response.json();
-    }
-
     React.useEffect(() => {
         function onSuccess(json) {
-            console.log("Station, fetchData SUCCESS, json: ", json);
+            console.log("Stations, fetchData SUCCESS, json: ", json);
             setData(json);
         }
+        function onError(error) {
+            console.log("Stations, fetch data error: ", error)
+            setData([]);
+        }
 
-        fetch("http://127.0.0.1:8000/stations/")
-            .then(resolve)
-            .then(getJson)
-            .then(onSuccess)
-        //Następujący błąd występujący w Firefoxie:
-        //Błąd mapy źródła: Error: NetworkError when attempting to fetch resource.
-        //należy zignorować, wynika z buga w tej przeglądarce
+        console.log("Stations, attempting to fetch data, path: ", ALL_STATIONS_PATH);
+
+        GET(ALL_STATIONS_PATH, onSuccess, onError);
+
     }, []
     );
 
