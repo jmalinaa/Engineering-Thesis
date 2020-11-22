@@ -18,13 +18,14 @@ public class WeatherService {
         return weatherRepository.findAll();
     }
 
-
     public Optional<Weather> getWeatherById(Long id) {
         return weatherRepository.findById(id);
     }
 
-    public long addWeather(Weather newWeather) {
-        weatherRepository.save(newWeather);
-        return newWeather.getId();
+    public void addWeather(Weather newWeather) {
+        if (weatherRepository.findByValues(newWeather.getMeasurement().getId(),
+                newWeather.getMeasurementType().name(), newWeather.getMeasurementValue()).isEmpty()) {
+            weatherRepository.save(newWeather);
+        }
     }
 }

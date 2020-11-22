@@ -40,10 +40,8 @@ public class XlsImportService {
                                       Map<String, Integer> pollutionColumnsNamesAndNos) throws IOException {
         log.info(String.format("importMeasurementXls invoked for stationId: %d", stationId));
         try {
-            Workbook offices = new XSSFWorkbook(file.getInputStream());
-            Iterator<Sheet> worksheets = offices.sheetIterator();
-            worksheets.forEachRemaining(ws ->
-                    parseSheet(ws, stationId, timeColumnNo, weatherColumnsNamesAndNos, pollutionColumnsNamesAndNos));
+            Workbook workbook = new XSSFWorkbook(file.getInputStream());
+            parseSheet(workbook.getSheetAt(0), stationId, timeColumnNo, weatherColumnsNamesAndNos, pollutionColumnsNamesAndNos);
         } catch (IOException e) {
             throw new IOException(e);
         }
@@ -63,7 +61,7 @@ public class XlsImportService {
     private void parseRow(Row row, Station station, int timeColumnNo,
                           Map<String, Integer> weatherColumnsNamesAndNos,
                           Map<String, Integer> pollutionColumnsNamesAndNos) {
-        Measurement measurement = Measurement.builder()
+   Measurement measurement = Measurement.builder()
                 .station(station)
                 .time(row.getCell(timeColumnNo).getDateCellValue())
                 .build();

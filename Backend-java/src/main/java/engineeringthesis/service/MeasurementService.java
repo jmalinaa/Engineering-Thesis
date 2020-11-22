@@ -24,7 +24,12 @@ public class MeasurementService {
     }
 
     public long addMeasurement(Measurement newMeasurement) {
-        measurementRepository.save(newMeasurement);
-        return newMeasurement.getId();
+        Optional<Measurement> sameExisting = measurementRepository.findByValues(newMeasurement.getStation().getId(), newMeasurement.getTime());
+        if(sameExisting.isPresent()) {
+            return sameExisting.get().getId();
+        } else {
+            measurementRepository.save(newMeasurement);
+            return newMeasurement.getId();
+        }
     }
 }

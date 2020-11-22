@@ -18,13 +18,15 @@ public class PollutionService {
         return pollutionRepository.findAll();
     }
 
-
     public Optional<Pollution> getPollutionById(Long id) {
         return pollutionRepository.findById(id);
     }
 
-    public long addPollution(Pollution newPollution) {
-        pollutionRepository.save(newPollution);
-        return newPollution.getId();
+    public void addPollution(Pollution newPollution) {
+        if(pollutionRepository.findByValues(newPollution.getMeasurement().getId(),
+                newPollution.getMeasurementType().name(), newPollution.getMeasurementValue()).isEmpty()) {
+            pollutionRepository.save(newPollution);
+        }
     }
+
 }
