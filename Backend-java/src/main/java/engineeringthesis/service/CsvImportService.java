@@ -1,5 +1,6 @@
 package engineeringthesis.service;
 
+import au.com.bytecode.opencsv.CSVReader;
 import engineeringthesis.model.jpa.Measurement;
 import engineeringthesis.model.jpa.Pollution;
 import engineeringthesis.model.jpa.Station;
@@ -7,21 +8,18 @@ import engineeringthesis.model.jpa.Weather;
 import engineeringthesis.model.jpa.enums.PollutionMeasurementType;
 import engineeringthesis.model.jpa.enums.WeatherMeasurementType;
 import lombok.extern.java.Log;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Iterator;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.Map;
 
 @Log
 @Service
-public class XlsImportService {
+public class CsvImportService {
 
     @Autowired
     private MeasurementService measurementService;
@@ -35,37 +33,29 @@ public class XlsImportService {
     @Autowired
     private PollutionService pollutionService;
 
-    public void importMeasurementsXls(MultipartFile file, long stationId, int timeColumnNo,
+    public void importMeasurementsCsv(MultipartFile file, long stationId, int timeColumnNo,
                                       Map<String, Integer> weatherColumnsNamesAndNos,
                                       Map<String, Integer> pollutionColumnsNamesAndNos) throws IOException {
-        log.info(String.format("importMeasurementXls invoked for stationId: %d", stationId));
-        try {
-            Workbook offices = new XSSFWorkbook(file.getInputStream());
-            Iterator<Sheet> worksheets = offices.sheetIterator();
-            worksheets.forEachRemaining(ws ->
-                    parseSheet(ws, stationId, timeColumnNo, weatherColumnsNamesAndNos, pollutionColumnsNamesAndNos));
-        } catch (IOException e) {
-            throw new IOException(e);
-        }
-    }
-
-    private void parseSheet(Sheet worksheet, long stationId, int timeColumnNo,
-                            Map<String, Integer> weatherColumnsNamesAndNos,
-                            Map<String, Integer> pollutionColumnsNamesAndNos) {
+        log.info(String.format("importMeasurementCsv invoked for stationId: %d", stationId));
         Station station = stationService.getStationById(stationId).orElseThrow();
-
-        Iterator<Row> rows = worksheet.rowIterator();
-        rows.next();
-        rows.forEachRemaining(row ->
-                parseRow(row, station, timeColumnNo, weatherColumnsNamesAndNos, pollutionColumnsNamesAndNos));
+        Reader reader = new InputStreamReader(file.getInputStream());
+        CSVReader csvReader = new CSVReader(reader);
+        String[] line;
+        csvReader.readNext(); //skip fisrt line with column names
+        while ((line = csvReader.readNext()) != null) {
+            parseLine(line, station, timeColumnNo, weatherColumnsNamesAndNos, pollutionColumnsNamesAndNos);
+        }
+        reader.close();
+        csvReader.close();
     }
 
-    private void parseRow(Row row, Station station, int timeColumnNo,
-                          Map<String, Integer> weatherColumnsNamesAndNos,
-                          Map<String, Integer> pollutionColumnsNamesAndNos) {
+    private void parseLine(String[] line, Station station, int timeColumnNo,
+                           Map<String, Integer> weatherColumnsNamesAndNos,
+                           Map<String, Integer> pollutionColumnsNamesAndNos) {
+
         Measurement measurement = Measurement.builder()
                 .station(station)
-                .time(row.getCell(timeColumnNo).getDateCellValue())
+                .time(DateUtil.parseDate(line[timeColumnNo]))
                 .build();
 
         measurement.setId(measurementService.addMeasurement(measurement));
@@ -75,7 +65,7 @@ public class XlsImportService {
                         Weather.builder()
                                 .measurement(measurement)
                                 .measurementType(WeatherMeasurementType.valueOf(name))
-                                .measurementValue(row.getCell(columnNo).getNumericCellValue())
+                                .measurementValue(Double.valueOf(line[columnNo]))
                                 .build()));
 
         pollutionColumnsNamesAndNos.forEach(
@@ -83,7 +73,8 @@ public class XlsImportService {
                         Pollution.builder()
                                 .measurement(measurement)
                                 .measurementType(PollutionMeasurementType.valueOf(name))
-                                .measurementValue(row.getCell(columnNo).getNumericCellValue())
+                                .measurementValue(Double.valueOf(line[columnNo]))
                                 .build()));
     }
 }
+

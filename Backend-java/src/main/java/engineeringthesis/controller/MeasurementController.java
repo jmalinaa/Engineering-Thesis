@@ -5,8 +5,8 @@ import com.google.gson.reflect.TypeToken;
 import engineeringthesis.model.jpa.Measurement;
 import engineeringthesis.model.jpa.enums.PollutionMeasurementType;
 import engineeringthesis.model.jpa.enums.WeatherMeasurementType;
+import engineeringthesis.service.FileImportService;
 import engineeringthesis.service.MeasurementService;
-import engineeringthesis.service.XlsImportService;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -14,7 +14,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -27,7 +26,7 @@ public class MeasurementController {
     private MeasurementService measurementService;
 
     @Autowired
-    private XlsImportService xlsImportService;
+    private FileImportService fileImportService;
 
     @Autowired
     private Gson gson;
@@ -54,13 +53,9 @@ public class MeasurementController {
                                                      @RequestParam("stationId") long stationId,
                                                      @RequestParam("columns") String columns) {
         log.info(String.format("importMeasurements invoked for stationId: %d and columns: %s", stationId, columns));
-        List<String> columnsList = gson.fromJson(columns, new TypeToken<ArrayList<String>>() {}.getType());
-        try {
-            xlsImportService.importMeasurementsXls(file, stationId, columnsList);
-        } catch (IllegalArgumentException | IOException e) {
-            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        return new ResponseEntity<>(HttpStatus.OK);
+        List<String> columnsList = gson.fromJson(columns, new TypeToken<ArrayList<String>>() {
+        }.getType());
+        return fileImportService.importFile(file, stationId, columnsList);
     }
 
     @GetMapping(path = "/measurements/columnNames")
