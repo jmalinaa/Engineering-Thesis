@@ -1,5 +1,6 @@
 package engineeringthesis.model.jpa;
 
+import engineeringthesis.model.jpa.enums.PollutionMeasurementType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,12 +23,11 @@ public class Pollution {
     @Column(name = "measurement_value")
     private Double measurementValue;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "measurement_type")
+    private PollutionMeasurementType measurementType;
+
     @ManyToOne
     @JoinColumn(name = "measurement_id")
     private Measurement measurement;
-
-    @ManyToOne
-    @JoinColumn(name = "pollution_dict_id", referencedColumnName = "pollution_dict_id")
-    private PollutionDictionary pollutionDictionary;
-
 }

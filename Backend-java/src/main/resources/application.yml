@@ -4,6 +4,6 @@ spring:
   profiles:
     active: local
   datasource:
-    url:
-    username:
-    password:
+    url: jdbc:mysql://mysql.agh.edu.pl:3306/malina
+    username: malina
+    password: 8gPGN7HkUnsBDKdU

@@ -1,5 +1,6 @@
 package engineeringthesis.model.jpa;
 
+import engineeringthesis.model.jpa.enums.WeatherMeasurementType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -15,19 +16,18 @@ import javax.persistence.*;
 public class Weather {
 
     @Id
-    @GeneratedValue (strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
 
     @Column(name = "measurement_value")
     private Double measurementValue;
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "measurement_type")
+    private WeatherMeasurementType measurementType;
+
     @ManyToOne
     @JoinColumn(name = "measurement_id")
     private Measurement measurement;
-
-    @ManyToOne
-    @JoinColumn(name = "weather_dict_id", referencedColumnName = "weather_dict_id")
-    private WeatherDictionary weatherDictionary;
-
 }

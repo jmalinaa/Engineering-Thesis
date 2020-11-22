@@ -18,7 +18,6 @@ public class StationService {
         return stationRepository.findAll();
     }
 
-
     public Optional<Station> getStationById(Long id) {
         return stationRepository.findById(id);
     }

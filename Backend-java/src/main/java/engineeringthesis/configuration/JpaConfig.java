@@ -59,6 +59,5 @@ public class JpaConfig {
         ps.put(AvailableSettings.DEFAULT_SCHEMA, "malina");
         ps.put(AvailableSettings.SHOW_SQL, "true");
         return ps;
-
     }
 }
