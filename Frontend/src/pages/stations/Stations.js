@@ -101,18 +101,17 @@ function Stations({ location, props }) {
         setConfirmationDialogOpen(false);
     }
 
+    //TODO add alert if fetching data fails
+
     return (
         <div className={classes.root}>
             <Grid container spacing={2} justify="space-around">
-                <Grid item xs={5}>
+                <Grid item xs={8}>
                     <EnhancedTable
                         headCells={headCells}
                         addNewRowHandler={addNewStation}
                         rows={data}
                     />
-                </Grid>
-                <Grid item xs={3}>
-                    <Paper className={classes.paper}>przyciski</Paper>
                 </Grid>
                 <Grid item xs={4}>
                     <Paper className={classes.paper}>mapa</Paper>
