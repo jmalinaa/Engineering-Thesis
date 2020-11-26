@@ -7,8 +7,9 @@ export default function GET(path, data, onSuccess, onError) {
     const init = {
         method: 'POST',
         headers: headers,
-        cache: 'no-cache',
-        body: JSON.stringify(data)
+        cache: 'default',
+        // body: JSON.stringify(data)
+        body: data
     };
 
     function log(promise) {
@@ -25,7 +26,10 @@ export default function GET(path, data, onSuccess, onError) {
     function checkStatus(response) {
         if (!response.ok) {
             errorOccurred = true;
-            onError('Wystąpił błąd. Status odpowiedzi: ' + response.status);
+            let message = 'Wystąpił błąd. Status odpowiedzi: ' + response.status + ' ';
+            if (response.error != null)
+                message += response.error;
+            onError(message);
             return null;
         }
         return response;
@@ -35,11 +39,11 @@ export default function GET(path, data, onSuccess, onError) {
         console.log("GET, getJson, response: ", response);
         if (response == null)
             return null;
-        const contentType = response.headers.get('content-type');
-        console.log("GET, getJson, contentType: ", contentType);
-        if (!contentType || !contentType.includes('application/json')) {
-            return null; 
-        }
+        // const contentType = response.headers.get('content-type');
+        // console.log("GET, getJson, contentType: ", contentType);
+        // if (!contentType || !contentType.includes('application/json')) {
+        //     return null; 
+        // }
         return response.json();
     }
 

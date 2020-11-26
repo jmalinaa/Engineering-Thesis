@@ -13,7 +13,9 @@ or:
 `npm install xlsx`
 `npm install react-data-table-component`
 `npm install styled-components`
-`npm install --save react-csv-reader`
+`npm install react-file-reader --save`
+`npm install read-excel-file --save`
+`npm install papaparse`
 
 ## Available Scripts
 

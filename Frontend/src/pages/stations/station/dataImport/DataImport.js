@@ -47,7 +47,7 @@ export default function DataImport({ data, acceptableColumns, handleSubmit, ...p
 
     function createSelectFields(data) {
         const fileColumns = [];
-        Object.keys(data[0])
+        data[0]
             .map((columnNameInFile, index) => {
                 fileColumns.push(
                     {
@@ -68,7 +68,7 @@ export default function DataImport({ data, acceptableColumns, handleSubmit, ...p
                                     <FormHelperText>Wypełnij pole</FormHelperText>
                                 }
                             </FormControl>,
-                        selector: columnNameInFile
+                        selector: row => row[index]
                     })
             });
         return fileColumns;
@@ -96,7 +96,7 @@ export default function DataImport({ data, acceptableColumns, handleSubmit, ...p
 }
 
 DataImport.propTypes = {
-    data: PropTypes.arrayOf(PropTypes.object),
+    data: PropTypes.array,
     acceptableColumns: PropTypes.arrayOf(PropTypes.string),
     handleSubmit: PropTypes.func
 }
