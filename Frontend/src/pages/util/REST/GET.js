@@ -35,7 +35,7 @@ export default function GET(path, onSuccess, onError) {
         console.log("GET, getJson, response: ", response);
         if (response == null)
             return null;
-        const contentType = response.headers.get('content-type');
+        // const contentType = response.headers.get('content-type');
         // console.log("GET, getJson, contentType: ", contentType);
         // if (!contentType || !contentType.includes('application/json')) {
         //     errorOccurred = true;
