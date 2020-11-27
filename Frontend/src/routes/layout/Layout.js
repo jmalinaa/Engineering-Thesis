@@ -17,6 +17,7 @@ function Layout(props) {
   };
 
   const handleDrawerClose = () => {
+    console.log('drawer closes')
     setOpen(false);
   };
 
@@ -40,10 +41,10 @@ function Layout(props) {
         </Toolbar>
       </AppBar>
       <Toolbar /> {/* Ten toolbar jest ważny - bez niego górny pasek przykrywa część strony */}
-          <Sidebar open={open} handleDrawerClose={handleDrawerClose} />
-          <div>
-            {props.children}
-          </div>
+      <Sidebar open={open} handleDrawerClose={handleDrawerClose} />
+      <div>
+        {props.children}
+      </div>
 
     </React.Fragment>
   )

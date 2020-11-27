@@ -74,7 +74,7 @@ function Stations({ location, props }) {
 
     function onAddStationError(error) {
         console.log("Stations, onAddStationSuccess, ERROR error: ", error);
-        handleOpenConfrimationDialog(error, 'error')
+        handleOpenConfrimationDialog(error.toString(), 'error')
     }
 
     function addNewStation() {
