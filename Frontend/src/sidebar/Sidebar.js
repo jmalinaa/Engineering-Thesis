@@ -1,6 +1,7 @@
 import React from "react";
-import Drawer from '@material-ui/core/Drawer';
+import ClickAwayListener from '@material-ui/core/ClickAwayListener';
 import CssBaseline from '@material-ui/core/CssBaseline';
+import Drawer from '@material-ui/core/Drawer';
 
 import List from '@material-ui/core/List';
 
@@ -18,41 +19,46 @@ function Sidebar(props) {
 
     console.log("Sidebar, props: ", props);
 
+    let mouseEvent = 'onClick';
+    if (!props.open)
+        mouseEvent = false;  //if sidebar isn't open, the clickAwayListener will be disabled
+
+
     return (
-        <div>
-            <CssBaseline />
-            
-            <Drawer
-                variant="persistent"
-                anchor="left"
-                open={props.open}
-            >
-                <div>
-                    <IconButton onClick={props.handleDrawerClose}>
-                        <ChevronLeftIcon />
-                    </IconButton>
-                </div>
-                <List>
-                    {/* <Link to={"/stations"}>
+        <ClickAwayListener mouseEvent={mouseEvent} onClickAway={props.handleDrawerClose}>
+            <div>
+                <CssBaseline />
+                <Drawer
+                    variant="persistent"
+                    anchor="left"
+                    open={props.open}
+                >
+                    <div>
+                        <IconButton onClick={props.handleDrawerClose}>
+                            <ChevronLeftIcon />
+                        </IconButton>
+                    </div>
+                    <List>
+                        {/* <Link to={"/stations"}>
                         <ListItem button key={"Stations"}>
                             <ListItemText primary="Stations" />
                         </ListItem>
                     </Link> */}
-                    <ListItem button key={"MainPage"}>
-                        <Link to={"/"}>
-                            <ListItemText primary="Strona główna" />
-                        </Link>
-                    </ListItem>
-                    <ListItem button key={"Stations"}>
-                        <Link to={"/stations"}>
-                            <ListItemText primary="Stacje" />
-                        </Link>
-                    </ListItem>
+                        <ListItem button key={"MainPage"}>
+                            <Link to={"/"}>
+                                <ListItemText primary="Strona główna" />
+                            </Link>
+                        </ListItem>
+                        <ListItem button key={"Stations"}>
+                            <Link to={"/stations"}>
+                                <ListItemText primary="Stacje" />
+                            </Link>
+                        </ListItem>
 
-                </List>
-            </Drawer>
-        </div>
-
+                    </List>
+                </Drawer>
+            </div>
+        </ClickAwayListener>
     );
 }
 

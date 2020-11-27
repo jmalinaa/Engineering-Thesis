@@ -8,8 +8,7 @@ export default function GET(path, data, onSuccess, onError) {
         method: 'POST',
         headers: headers,
         cache: 'default',
-        // body: JSON.stringify(data)
-        body: data
+        body: JSON.stringify(data)
     };
 
     function log(promise) {
@@ -35,18 +34,6 @@ export default function GET(path, data, onSuccess, onError) {
         return response;
     }
 
-    function getJson(response) {
-        console.log("GET, getJson, response: ", response);
-        if (response == null)
-            return null;
-        // const contentType = response.headers.get('content-type');
-        // console.log("GET, getJson, contentType: ", contentType);
-        // if (!contentType || !contentType.includes('application/json')) {
-        //     return null; 
-        // }
-        return response.json();
-    }
-
     //dzieki wrapperowi onSuccess nie wykonuje się gdy na przykład nie ma nagłówka application/json
     //ale rzucenie wyjątku nie wystarczy, by wykonało się onError!
     function onSuccessWrapper(json) {
@@ -58,7 +45,6 @@ export default function GET(path, data, onSuccess, onError) {
         .then(log)
         .then(resolve)
         .then(checkStatus)
-        .then(getJson)
         .then(onSuccessWrapper)
         .catch(onError)
     //Następujący błąd występujący w Firefoxie:
