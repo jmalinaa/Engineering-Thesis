@@ -11,8 +11,6 @@ import {
     IMPORT_MEASUREMENTS_FILE_PATH
 } from "../../util/REST/paths";
 import GET from "../../util/REST/GET";
-import POST from "../../util/REST/POST";
-import { ColorLensOutlined } from "@material-ui/icons";
 import * as Papa from 'papaparse';
 
 export default function Station(props) {
