@@ -10,7 +10,6 @@ import Select from '@material-ui/core/Select';
 
 import { makeStyles } from '@material-ui/core/styles';
 import PropTypes from 'prop-types';
-import useField from '../../../../materialUiWrappers/useField';
 
 const useStyles = makeStyles((theme) => ({  //TODO extract this
     formControl: {

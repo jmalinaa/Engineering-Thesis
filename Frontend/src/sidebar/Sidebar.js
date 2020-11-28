@@ -23,7 +23,8 @@ function Sidebar(props) {
     if (!props.open)
         mouseEvent = false;  //if sidebar isn't open, the clickAwayListener will be disabled
 
-
+    //todo moze by tak użyć redirect to zamiast linka, bo ten sidebar brzydko wygląda
+    //z drugiej strony prze redirectach historia nie działa prawidłowo
     return (
         <ClickAwayListener mouseEvent={mouseEvent} onClickAway={props.handleDrawerClose}>
             <div>
