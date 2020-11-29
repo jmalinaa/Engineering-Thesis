@@ -72,16 +72,6 @@ export default function Station(props) {
     }, [stationId]
     );
 
-    const parseOptions = {
-        header: true,
-        dynamicTyping: true,
-        skipEmptyLines: true,
-        transformHeader: header =>
-            header
-                .toLowerCase()
-                .replace(/\W/g, '_')
-    }
-
     function handleUpload(filesList) {
         setAlertMsg(null);
         setSuccessMsg(null);

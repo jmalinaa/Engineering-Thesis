@@ -16,6 +16,8 @@ or:
 `npm install react-file-reader --save`
 `npm install read-excel-file --save`
 `npm install papaparse`
+`npm install victory`
+`npm install react-timeseries-charts pondjs --save`
 
 ## Available Scripts
 

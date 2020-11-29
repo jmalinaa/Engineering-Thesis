@@ -47,7 +47,7 @@ export default function DataImport({ data, acceptableColumns, handleSubmit, ...p
     function createSelectFields(data) {
         const fileColumns = [];
         data[0]
-            .map((columnNameInFile, index) => {
+            .forEach((columnNameInFile, index) => {
                 fileColumns.push(
                     {
                         name:
