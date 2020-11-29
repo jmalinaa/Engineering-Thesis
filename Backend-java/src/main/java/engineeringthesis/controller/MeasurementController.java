@@ -2,7 +2,7 @@ package engineeringthesis.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import engineeringthesis.model.jpa.Measurement;
+import engineeringthesis.model.dto.StationMeasurements;
 import engineeringthesis.model.jpa.enums.PollutionMeasurementType;
 import engineeringthesis.model.jpa.enums.WeatherMeasurementType;
 import engineeringthesis.service.FileImportService;
@@ -16,7 +16,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 
 @Log
 @RestController
@@ -38,11 +37,11 @@ public class MeasurementController {
     }
 
     @GetMapping(path = "/measurements/{id}")
-    public ResponseEntity<String> getMeasurement(@PathVariable("id") long id) {
+    public ResponseEntity<String> getMeasurementsByStationId(@PathVariable("id") long id) {
         log.info(String.format("getMeasurements invoked for id: %d", id));
-        Optional<Measurement> measurement = measurementService.getMeasurementById(id);
-        if (measurement.isPresent()) {
-            return new ResponseEntity<>(gson.toJson(measurement.get()), HttpStatus.OK);
+        List<StationMeasurements> stationMeasurements = measurementService.getMeasurementByStationId(id);
+        if (!stationMeasurements.isEmpty()) {
+            return new ResponseEntity<>(gson.toJson(stationMeasurements), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
