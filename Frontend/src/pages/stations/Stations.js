@@ -162,7 +162,7 @@ function Stations({ location, props }) {
     const contextActions = [
         <Tooltip title="Przejdź do stacji" id={'redirectTooltip'}>
             <span>
-                <IconButton onClick={() => setTriggerRedirectionToStation(true)} disabled={selectedRowsCount != 1} >
+                <IconButton onClick={() => setTriggerRedirectionToStation(true)} disabled={selectedRowsCount !== 1} >
                     {redirectToStation()}
                     <SubdirectoryArrowRightIcon />
                 </IconButton>
@@ -170,7 +170,7 @@ function Stations({ location, props }) {
         </Tooltip>,
         <Tooltip title="Porównaj dane pomiarowe na wykresie" id={'comparisonTooltip'}>
             <span>
-                <IconButton onClick={() => setTriggerRedirectionToComparison(true)} disabled={selectedRowsCount != 2} >
+                <IconButton onClick={() => setTriggerRedirectionToComparison(true)} disabled={selectedRowsCount !== 2} >
                     {redirectToComparison()}
                     <CompareIcon />
                 </IconButton>
