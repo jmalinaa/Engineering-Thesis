@@ -132,6 +132,7 @@ function Stations({ location, props }) {
     }
 
     //TODO add alert if fetching data fails
+    //TODO extract paths to separate file!
 
     function redirectToStation() {
         console.log("Stations, redirectToStation, selectedRows: ", selectedRows);
@@ -145,10 +146,9 @@ function Stations({ location, props }) {
     function redirectToComparison() {
         console.log("Stations, redirectToComparison, selectedRows: ", selectedRows);
         if (triggerRedirectionToComparison)
-            // return (<Redirect        TODO here, figure out redirection with queryParams
-            //     to={`/station/${selectedRows[0].id}`} //assuming there are exactly two selected rows!
-            // />)
-            return null;
+            return (<Redirect        
+                to={`/stations/comparison/${selectedRows[0].id}/${selectedRows[1].id}`} //assuming there are exactly two selected rows!
+            />)
     }
 
     const actions = [
