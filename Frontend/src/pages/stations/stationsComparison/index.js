@@ -1,3 +1,3 @@
-import StationComparison from './StationComparison';
+import StationsComparison from './StationsComparison';
 
-export default StationComparison;
+export default StationsComparison;

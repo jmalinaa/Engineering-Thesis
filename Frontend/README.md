@@ -18,6 +18,7 @@ or:
 `npm install papaparse`
 `npm install victory`
 `npm install react-timeseries-charts pondjs --save`
+`npm install moment --save`
 
 ## Available Scripts
 

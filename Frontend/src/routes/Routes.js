@@ -3,7 +3,7 @@ import { BrowserRouter, Route, Switch } from "react-router-dom";
 import MainPage from "../pages/mainPage";
 import Layout from "./layout"
 import Station from "../pages/stations/station";
-import StationComparison from "../pages/stations/stationsComparison/StationComparison";
+import StationsComparison from "../pages/stations/stationsComparison/StationsComparison";
 import Stations from "../pages/stations";
 
 function Routes() {
@@ -15,7 +15,7 @@ function Routes() {
                         <Route exact path='/' component={MainPage} />
                         <Route exact path='/stations' component={Stations} />
                         <Route exact path='/station/:id' component={Station} />
-                        <Route exact path='/stations/comparison/:id1/:id2' component={StationComparison} />
+                        <Route exact path='/stations/comparison/:id1/:id2' component={StationsComparison} />
                     </Switch>
                 </Layout>
             )} />
