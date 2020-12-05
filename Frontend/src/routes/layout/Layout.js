@@ -1,6 +1,6 @@
 import React from 'react';
 
-import Sidebar from '../../sidebar/Sidebar';
+import Sidebar from '../../sidebar';
 import AppBar from '@material-ui/core/AppBar';
 import IconButton from '@material-ui/core/IconButton';
 import Toolbar from '@material-ui/core/Toolbar';

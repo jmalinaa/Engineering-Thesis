@@ -45,12 +45,12 @@ function Sidebar(props) {
                             <ListItemText primary="Stations" />
                         </ListItem>
                     </Link> */}
-                        <ListItem button key={"MainPage"}>
+                        <ListItem button key={"MainPage"} onClick={props.handleDrawerClose}>
                             <Link to={"/"}>
                                 <ListItemText primary="Strona główna" />
                             </Link>
                         </ListItem>
-                        <ListItem button key={"Stations"}>
+                        <ListItem button key={"Stations"} onClick={props.handleDrawerClose}>
                             <Link to={"/stations"}>
                                 <ListItemText primary="Stacje" />
                             </Link>
