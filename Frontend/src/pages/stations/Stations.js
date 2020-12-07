@@ -152,7 +152,7 @@ function Stations({ location, props }) {
     }
 
     const actions = [
-        <Tooltip title="Dodaj nową stację" id={'addTootltip'}>
+        <Tooltip title="Dodaj nową stację" id={'addTootltip'} key={'action-0'}>
             <IconButton onClick={addNewStation}>
                 <AddIcon />
             </IconButton>
@@ -160,7 +160,7 @@ function Stations({ location, props }) {
     ]   //actions which will always be available in the table
 
     const contextActions = [
-        <Tooltip title="Przejdź do stacji" id={'redirectTooltip'}>
+        <Tooltip title="Przejdź do stacji" id={'redirectTooltip'} key={'context-action-0'}>
             <span>
                 <IconButton onClick={() => setTriggerRedirectionToStation(true)} disabled={selectedRowsCount !== 1} >
                     {redirectToStation()}
@@ -168,7 +168,7 @@ function Stations({ location, props }) {
                 </IconButton>
             </span>
         </Tooltip>,
-        <Tooltip title="Porównaj dane pomiarowe na wykresie" id={'comparisonTooltip'}>
+        <Tooltip title="Porównaj dane pomiarowe na wykresie" id={'comparisonTooltip'} key={'context-action-1'}>
             <span>
                 <IconButton onClick={() => setTriggerRedirectionToComparison(true)} disabled={selectedRowsCount !== 2} >
                     {redirectToComparison()}

@@ -12,7 +12,7 @@ import {
 } from "../../util/REST/paths";
 import GET from "../../util/REST/GET";
 import moment from 'moment';
-import { TimeSeries } from "pondjs";
+import { TimeRange, TimeSeries, timerange } from "pondjs";
 
 export default function StationsComparison({ ...props }) {
     console.log("StationComparison, props:", props);
@@ -25,8 +25,7 @@ export default function StationsComparison({ ...props }) {
     const [station2MeasurementData, setStation2MeasurementData] = React.useState(null);
     const [chartColumns, setChartColumns] = React.useState([]);
     const [seriesList, setSeriesList] = React.useState([])
-    const [chart1Data, setChart1Data] = React.useState(null);   //list of { x: 1, y: 2 }-like objects
-    const [chart2Data, setChart2Data] = React.useState(null);
+    const [timeRange, setTimeRange] = React.useState(null);
     const [alertMsg, setAlertMsg] = React.useState(null);
 
     function findMeasurementsOfType(measurementsStructsList, type) {
@@ -46,7 +45,6 @@ export default function StationsComparison({ ...props }) {
             let time = moment.utc(measurement.time, "LLL");
             // let time = moment.utc(measurements.time, "MMM DD, YYYY, hh:mm:ss AA", true);
             let value = measurement.value;
-            console.log('StationsComparison, createDatStructForType, time', time);
             return [time.toDate().valueOf(), value]
         })
         return ({
@@ -145,8 +143,9 @@ export default function StationsComparison({ ...props }) {
         setSeriesList(newSeriesList);
     }
 
-    function onTimePeriodChange(event) {
-        console.log("StationComparison, onTimePeriodChange, event:", event);
+    function onTimePeriodChange(newTimePeriod) {
+        console.log("StationComparison, onTimePeriodChange, newTimePeriod:", newTimePeriod);
+        setTimeRange(new TimeRange(...newTimePeriod));
     }
 
 
@@ -155,7 +154,9 @@ export default function StationsComparison({ ...props }) {
     console.log("StationComparison, requested stations data:", station1Data, station2Data);
     console.log("StationComparison, requested stations data:", station1MeasurementData, station2MeasurementData);
 
-    function pickInitialTimerange() {
+    function pickTimerange() {
+        if (timeRange != null)
+            return timeRange;
         let seriesHavingTimerange = seriesList.find(series => series.timerange() != null)
         if (seriesHavingTimerange == null)
             return null;
@@ -177,12 +178,13 @@ export default function StationsComparison({ ...props }) {
     }
 
 
-    let timeRange = pickInitialTimerange();
+    let pickedTimeRange = pickTimerange();
     let valueRanges = pickValueRanges()
 
     console.log("StationComparison, seriesList:", seriesList);
     console.log("StationComparison, chartColumns:", chartColumns);
     console.log("StationComparison, timeRange:", timeRange);
+    console.log("StationComparison, pickedTimeRange:", pickedTimeRange);
 
     //TODO może wydrębić wykresy do osobnego komponentu?
     //TODO dodać dane stacji pod tekstem 'Porównanie stacji o identyfikatorach...'
@@ -204,14 +206,14 @@ export default function StationsComparison({ ...props }) {
                             <ChartOptions
                                 asCheckBoxes={measurementTypes}
                                 onCheckBoxesChange={onMeasurementTypesChange}
-                                asTimePeriod={null}
-                                onTimePeriodChangeChange={onTimePeriodChange}
+                                asTimePeriod={pickedTimeRange != null ? [pickedTimeRange.begin(), pickedTimeRange.end()] : null}
+                                onTimePeriodChange={onTimePeriodChange}
                             />
                         </Grid>
                     }
-                    {seriesList.length > 0 && timeRange != null &&
+                    {seriesList.length > 0 && pickedTimeRange != null &&
                         <Grid item xs={9}>
-                            <ChartContainer timeRange={timeRange} width={800}>
+                            <ChartContainer timeRange={pickedTimeRange} width={800}>
                                 <ChartRow height="200">
                                     <YAxis id="axis1"
                                         label="wartość pomiaru"
@@ -229,7 +231,7 @@ export default function StationsComparison({ ...props }) {
                             </ChartContainer>
                         </Grid>
                     }
-                    {seriesList.length > 0 && timeRange == null &&
+                    {seriesList.length > 0 && pickedTimeRange == null &&
                         <Alert severity="warning">Nieprawidłowy zakres czasu lub brak pomiarów żądanego typu.</Alert>
                     }
                 </Grid>
