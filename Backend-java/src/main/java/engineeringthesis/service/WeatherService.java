@@ -1,7 +1,7 @@
 package engineeringthesis.service;
 
-import engineeringthesis.model.dto.MeasurementDetails;
-import engineeringthesis.model.dto.StationMeasurements;
+import engineeringthesis.model.dto.plot.MeasurementDetails;
+import engineeringthesis.model.dto.plot.StationMeasurements;
 import engineeringthesis.model.jpa.Weather;
 import engineeringthesis.model.jpa.enums.WeatherMeasurementType;
 import engineeringthesis.repository.WeatherRepository;
@@ -43,7 +43,7 @@ public class WeatherService {
 
     private List<MeasurementDetails> getMeasurementsByStationIdAndMeasurementType(long stationId, WeatherMeasurementType measurementType) {
         return em.createQuery(
-                "SELECT new engineeringthesis.model.dto.MeasurementDetails(m.time, w.measurementValue) FROM weather w JOIN w.measurement m WHERE m.station.id = :stationId AND w.measurementType = :measurementType",
+                "SELECT new engineeringthesis.model.dto.plot.MeasurementDetails(m.time, w.measurementValue) FROM weather w JOIN w.measurement m WHERE m.station.id = :stationId AND w.measurementType = :measurementType",
                 MeasurementDetails.class)
                 .setParameter("stationId", stationId)
                 .setParameter("measurementType", measurementType)
