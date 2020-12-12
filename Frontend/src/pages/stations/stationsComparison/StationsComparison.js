@@ -1,6 +1,7 @@
 import React from "react";
 
 import Alert from '@material-ui/lab/Alert';
+import Box from '@material-ui/core/Box';
 import Grid from '@material-ui/core/Grid';
 import { Charts, ChartContainer, ChartRow, YAxis, LineChart } from "react-timeseries-charts";
 import ChartOptions from './chartOptions';
@@ -12,10 +13,14 @@ import {
 } from "../../util/REST/paths";
 import GET from "../../util/REST/GET";
 import moment from 'moment';
-import { TimeRange, TimeSeries, timerange } from "pondjs";
+import { TimeRange, TimeSeries } from "pondjs";
+import makeStyles from './styles';
+import { colors } from './styles';
+import { createLinesStyles } from './styles';
 
 export default function StationsComparison({ ...props }) {
     console.log("StationComparison, props:", props);
+    const styles = makeStyles();
     const station1Id = props.match.params.id1;
     const station2Id = props.match.params.id2;
     const [measurementTypes, setMeasurementTypes] = React.useState(null);
@@ -24,7 +29,8 @@ export default function StationsComparison({ ...props }) {
     const [station1MeasurementData, setStation1MeasurementData] = React.useState(null);
     const [station2MeasurementData, setStation2MeasurementData] = React.useState(null);
     const [chartColumns, setChartColumns] = React.useState([]);
-    const [seriesList, setSeriesList] = React.useState([])
+    const [seriesList, setSeriesList] = React.useState([]);
+    const [stylesList, setStylesList] = React.useState([]);
     const [timeRange, setTimeRange] = React.useState(null);
     const [alertMsg, setAlertMsg] = React.useState(null);
 
@@ -127,6 +133,7 @@ export default function StationsComparison({ ...props }) {
         //TODO here 
         //najpierw coś prostego, same PM10
         let newDataList = [];
+        let newStylesList = [];
         let measurementTypesToDraw = []
         typesBitmap.forEach((bit, index) => {
             if (bit) {
@@ -134,6 +141,8 @@ export default function StationsComparison({ ...props }) {
                 measurementTypesToDraw.push(measurementType);
                 newDataList.push(createDataStructForType(station1MeasurementData, measurementType, station1Id))
                 newDataList.push(createDataStructForType(station2MeasurementData, measurementType, station2Id))
+                newStylesList.push(createLinesStyles(measurementType, station1Id, colors[index * 2]))
+                newStylesList.push(createLinesStyles(measurementType, station2Id, colors[index * 2 + 1]))
             }
         })
         setChartColumns(measurementTypesToDraw);
@@ -141,6 +150,7 @@ export default function StationsComparison({ ...props }) {
 
         let newSeriesList = newDataList.map(data => new TimeSeries(data))
         setSeriesList(newSeriesList);
+        setStylesList(newStylesList);
     }
 
     function onTimePeriodChange(newTimePeriod) {
@@ -181,6 +191,8 @@ export default function StationsComparison({ ...props }) {
     let pickedTimeRange = pickTimerange();
     let valueRanges = pickValueRanges()
 
+    const chartStyle = null;
+
     console.log("StationComparison, seriesList:", seriesList);
     console.log("StationComparison, chartColumns:", chartColumns);
     console.log("StationComparison, timeRange:", timeRange);
@@ -208,11 +220,14 @@ export default function StationsComparison({ ...props }) {
                                 onCheckBoxesChange={onMeasurementTypesChange}
                                 asTimePeriod={pickedTimeRange != null ? [pickedTimeRange.begin(), pickedTimeRange.end()] : null}
                                 onTimePeriodChange={onTimePeriodChange}
+                                colorsList={colors}
+                                station1Id={station1Id}
+                                station2Id={station2Id}
                             />
                         </Grid>
                     }
                     {seriesList.length > 0 && pickedTimeRange != null &&
-                        <Grid item xs={9}>
+                        <Grid item xs={9} container direction='column'>
                             <ChartContainer timeRange={pickedTimeRange} width={800}>
                                 <ChartRow height="200">
                                     <YAxis id="axis1"
@@ -224,11 +239,23 @@ export default function StationsComparison({ ...props }) {
                                         format=",.2f" />
                                     <Charts>
                                         {seriesList.map((series, index) =>
-                                            <LineChart axis="axis1" series={series} columns={chartColumns} key={index} />
+                                            <LineChart axis="axis1" series={series} columns={chartColumns} style={stylesList[index]} key={index} />
                                         )}
                                     </Charts>
                                 </ChartRow>
                             </ChartContainer>
+                            {stylesList.map((style, index) =>
+                                <Grid container key={index}>
+                                    <Grid item xs={1}>
+                                        <Box bgcolor={style.color} color={style.color} className={styles.colorBox}>
+                                            '   '
+                                        </Box>
+                                    </Grid>
+                                    <Grid item>
+                                        <h3>Stacja {style.station}, {style.measurementType}</h3>
+                                    </Grid>
+                                </Grid>
+                            )}
                         </Grid>
                     }
                     {seriesList.length > 0 && pickedTimeRange == null &&
