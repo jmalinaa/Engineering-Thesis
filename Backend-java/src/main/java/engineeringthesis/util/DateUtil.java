@@ -1,4 +1,4 @@
-package engineeringthesis.service;
+package engineeringthesis.util;
 
 import com.joestelmach.natty.DateGroup;
 import com.joestelmach.natty.Parser;
