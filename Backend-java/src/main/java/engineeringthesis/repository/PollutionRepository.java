@@ -14,6 +14,6 @@ public interface PollutionRepository extends JpaRepository<Pollution, Long> {
 
     Optional<Pollution> findById(@Param("id") Long id);
 
-    @Query(value = "SELECT * FROM pollution p WHERE p.measurement_id = :measurementId AND p.measurement_type = :measurementType AND p.measurement_value = :measurementValue", nativeQuery = true)
-    Optional<Pollution> findByValues(@Param("measurementId") long measurementId, @Param("measurementType") String measurementType, @Param("measurementValue") double measurementValue);
+    @Query(value = "SELECT * FROM pollution p WHERE p.measurement_id = :measurementId AND p.measurement_type = :measurementType", nativeQuery = true)
+    Optional<Pollution> findByValues(@Param("measurementId") long measurementId, @Param("measurementType") String measurementType);
 }

@@ -61,20 +61,30 @@ public class CsvImportService {
         measurement.setId(measurementService.addMeasurement(measurement));
 
         weatherColumnsNamesAndNos.forEach(
-                (name, columnNo) -> weatherService.addWeather(
-                        Weather.builder()
-                                .measurement(measurement)
-                                .measurementType(WeatherMeasurementType.valueOf(name))
-                                .measurementValue(Double.valueOf(line[columnNo]))
-                                .build()));
+                (name, columnNo) -> {
+                    String value = line[columnNo];
+                    if(!value.equalsIgnoreCase("")) {
+                        weatherService.addWeather(
+                                Weather.builder()
+                                        .measurement(measurement)
+                                        .measurementType(WeatherMeasurementType.valueOf(name))
+                                        .measurementValue(Double.valueOf(value))
+                                        .build());
+                    }
+                });
 
         pollutionColumnsNamesAndNos.forEach(
-                (name, columnNo) -> pollutionService.addPollution(
-                        Pollution.builder()
-                                .measurement(measurement)
-                                .measurementType(PollutionMeasurementType.valueOf(name))
-                                .measurementValue(Double.valueOf(line[columnNo]))
-                                .build()));
+                (name, columnNo) -> {
+                    String value = line[columnNo];
+                    if (!value.equalsIgnoreCase("")) {
+                        pollutionService.addPollution(
+                                Pollution.builder()
+                                        .measurement(measurement)
+                                        .measurementType(PollutionMeasurementType.valueOf(name))
+                                        .measurementValue(Double.valueOf(line[columnNo]))
+                                        .build());
+                    }
+                });
     }
 }
 

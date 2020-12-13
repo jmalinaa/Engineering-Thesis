@@ -23,8 +23,8 @@ public class PollutionService {
     public PollutionRepository pollutionRepository;
 
     public void addPollution(Pollution newPollution) {
-        if (pollutionRepository.findByValues(newPollution.getMeasurement().getId(),
-                newPollution.getMeasurementType().name(), newPollution.getMeasurementValue()).isEmpty()) {
+        if (pollutionRepository.findByValues(newPollution.getMeasurement().getId(), newPollution.getMeasurementType().name())
+                .isEmpty()) {
             pollutionRepository.save(newPollution);
         }
     }

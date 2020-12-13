@@ -7,9 +7,7 @@ import engineeringthesis.model.jpa.Weather;
 import engineeringthesis.model.jpa.enums.PollutionMeasurementType;
 import engineeringthesis.model.jpa.enums.WeatherMeasurementType;
 import lombok.extern.java.Log;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -61,7 +59,7 @@ public class XlsImportService {
     private void parseRow(Row row, Station station, int timeColumnNo,
                           Map<String, Integer> weatherColumnsNamesAndNos,
                           Map<String, Integer> pollutionColumnsNamesAndNos) {
-   Measurement measurement = Measurement.builder()
+        Measurement measurement = Measurement.builder()
                 .station(station)
                 .time(row.getCell(timeColumnNo).getDateCellValue())
                 .build();
@@ -69,19 +67,29 @@ public class XlsImportService {
         measurement.setId(measurementService.addMeasurement(measurement));
 
         weatherColumnsNamesAndNos.forEach(
-                (name, columnNo) -> weatherService.addWeather(
-                        Weather.builder()
-                                .measurement(measurement)
-                                .measurementType(WeatherMeasurementType.valueOf(name))
-                                .measurementValue(row.getCell(columnNo).getNumericCellValue())
-                                .build()));
+                (name, columnNo) -> {
+                    Cell c = row.getCell(columnNo);
+                    if (c != null && c.getCellType() == CellType.NUMERIC) {
+                        weatherService.addWeather(
+                                Weather.builder()
+                                        .measurement(measurement)
+                                        .measurementType(WeatherMeasurementType.valueOf(name))
+                                        .measurementValue(c.getNumericCellValue())
+                                        .build());
+                    }
+                });
 
         pollutionColumnsNamesAndNos.forEach(
-                (name, columnNo) -> pollutionService.addPollution(
-                        Pollution.builder()
-                                .measurement(measurement)
-                                .measurementType(PollutionMeasurementType.valueOf(name))
-                                .measurementValue(row.getCell(columnNo).getNumericCellValue())
-                                .build()));
+                (name, columnNo) -> {
+                    Cell c = row.getCell(columnNo);
+                    if (c != null && c.getCellType() == CellType.NUMERIC) {
+                        pollutionService.addPollution(
+                                Pollution.builder()
+                                        .measurement(measurement)
+                                        .measurementType(PollutionMeasurementType.valueOf(name))
+                                        .measurementValue(c.getNumericCellValue())
+                                        .build());
+                    }
+                });
     }
 }

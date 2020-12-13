@@ -23,8 +23,8 @@ public class WeatherService {
     public WeatherRepository weatherRepository;
 
     public void addWeather(Weather newWeather) {
-        if (weatherRepository.findByValues(newWeather.getMeasurement().getId(),
-                newWeather.getMeasurementType().name(), newWeather.getMeasurementValue()).isEmpty()) {
+        if (weatherRepository.findByValues(newWeather.getMeasurement().getId(), newWeather.getMeasurementType().name())
+                .isEmpty()) {
             weatherRepository.save(newWeather);
         }
     }
