@@ -17,10 +17,11 @@ export default function Station(props) {
     console.log("Station, props:", props);
     const stationId = props.match.params.id;
     const [stationData, setStationData] = React.useState(null);
-    const [acceptableColumns, setAcceptableColumns] = React.useState(null);
+    const [acceptableColumns, setAcceptableColumns] = React.useState(null); //TODO może możliwość ignorowania kolumn?
     const [measurements, setMeasurements] = React.useState([]);
     const [uploadedFile, setUploadedFile] = React.useState(null);
     const [alertMsg, setAlertMsg] = React.useState(null);
+    const [infoMsg, setInfoMsg] = React.useState(null);
     const [successMsg, setSuccessMsg] = React.useState(null);
     const [percentage, setPercentage] = React.useState(null);
 
@@ -118,6 +119,7 @@ export default function Station(props) {
             if (status === 0 || (status >= 200 && status < 400)) {
                 console.log("Import danych powiódł się ");
                 setSuccessMsg("Import danych powiódł się ");
+                setInfoMsg(null);
                 setMeasurements([]);
                 setUploadedFile(null);
                 setPercentage(100);
@@ -127,11 +129,6 @@ export default function Station(props) {
                 setPercentage(null);
             }
         }
-    }
-
-    function onProgress(e) {
-        console.log("Station, onProgress, event:", e);
-        setPercentage((e.loaded / e.total) * 100);
     }
 
     function handleSubmit(columnMappings, data) {
@@ -146,9 +143,9 @@ export default function Station(props) {
 
         var request = new XMLHttpRequest();
         request.onreadystatechange = () => handleOnReadyStateChanged(request);
-        request.onprogress = onProgress;
         request.open("POST", IMPORT_MEASUREMENTS_FILE_PATH, true);
         request.send(formData);
+        setInfoMsg("Import w toku");
     }
 
     console.log("Station, stationData:", stationData);
@@ -159,7 +156,7 @@ export default function Station(props) {
     return (
         <div>
             <h1>Stacja {stationData != null && stationData.name}</h1>
-            {stationData != null && alertMsg == null &&
+            {stationData != null && alertMsg == null && infoMsg == null &&
                 <div>
                     <h2>Długość geograficzna: {stationData.longitude}</h2>
                     <h2>Szerokość geograficzna: {stationData.latitude}</h2>
@@ -184,14 +181,14 @@ export default function Station(props) {
                     }
                 </div>
             }
+            {infoMsg != null &&
+                <Alert severity="info">{infoMsg}</Alert>
+            }
             {alertMsg != null &&
                 <Alert severity="warning">{alertMsg}</Alert>
             }
             {successMsg != null &&
                 <Alert severity="success">{successMsg}</Alert>
-            }
-            {percentage != null &&
-                <h1>Postęp: {percentage}%</h1>
             }
         </div>
     );
