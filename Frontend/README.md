@@ -19,6 +19,8 @@ or:
 `npm install victory`
 `npm install react-timeseries-charts pondjs --save`
 `npm install moment --save`
+`npm install leaflet`
+`npm install react-leaflet`
 
 ## Available Scripts
 

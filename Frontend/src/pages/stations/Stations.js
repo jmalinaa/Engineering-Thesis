@@ -1,25 +1,26 @@
 import React from 'react';
 
-import { makeStyles } from '@material-ui/core/styles';
 import AddIcon from '@material-ui/icons/Add';
-import IconButton from '@material-ui/core/IconButton';
-import ConfrimationDialog from '../util/popups/confirmationDialog/ConfirmationDialog';
 import CompareIcon from '@material-ui/icons/Compare';
+import ConfrimationDialog from '../util/popups/confirmationDialog/ConfirmationDialog';
 import DataTable from 'react-data-table-component';
 import Grid from '@material-ui/core/Grid';
-import Paper from '@material-ui/core/Paper';
+import IconButton from '@material-ui/core/IconButton';
 import StationManager from './stationManager';
-import Tooltip from '@material-ui/core/Tooltip';
+import StationsMap from './stationsMap';
 import SubdirectoryArrowRightIcon from '@material-ui/icons/SubdirectoryArrowRight';
+import Tooltip from '@material-ui/core/Tooltip';
 
 import { ALL_STATIONS_PATH, ADD_STATION_PATH } from "../util/REST/paths";
 import GET from "../util/REST/GET";
+import { makeStyles } from '@material-ui/core/styles';
 import POST from "../util/REST/POST";
 import { Redirect } from 'react-router-dom';
 
 function Stations({ location, props }) {
 
     const [data, setData] = React.useState([]);
+    const [newStationLocation, setNewStationLocation] = React.useState(null);
     const [addStationDialogOpen, setAddStationDialogOpen] = React.useState(false);
     const [selectedRows, setSelectedRows] = React.useState([]);
     const [selectedRowsCount, setSelectedRowsCount] = React.useState(0);
@@ -202,13 +203,14 @@ function Stations({ location, props }) {
                     />
                 </Grid>
                 <Grid item xs={4}>
-                    <Paper className={classes.paper}>mapa</Paper>
+                    <StationsMap stations={data} onTemporaryMarker={latlng => setNewStationLocation(latlng)}/>
                 </Grid>
             </Grid>
             <StationManager
                 open={addStationDialogOpen}
                 handleClose={handleCloseDialog}
                 handleSubmit={handleSubmitNewStation}
+                newStationLocation={newStationLocation}
             />
             <ConfrimationDialog
                 open={confirmationDialogOpen}
