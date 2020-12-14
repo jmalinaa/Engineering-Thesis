@@ -4,6 +4,7 @@ import './index.css';
 // import App from './App';
 import Routes from "./routes"
 import * as serviceWorker from './serviceWorker';
+import 'leaflet/dist/leaflet.css';
 
 ReactDOM.render(
     <Routes />,

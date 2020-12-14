@@ -8,29 +8,29 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import AddStationForm from './addStationForm/AddStationForm';
 
 
-export default function StationManager({ handleSubmit, handleClose, open, ...props }) {
+export default function StationManager({ handleSubmit, handleClose, open, newStationLocation, ...props }) {
 
-    const [name, setName] = React.useState(null);
-    const [longitude, setLongitude] = React.useState(null);
-    const [latitude, setLatitude] = React.useState(null);
+    const [nameKeeper] = React.useState({});        //no need for setters, these are just data-keepers
+    const [longitudeKeeper] = React.useState({});   
+    const [latitudeKeeper] = React.useState({});
 
     function changeNameHandler(event) {
-        setName(event.target.value);
+        nameKeeper.name = event.target.value;
     }
 
     function changeLongitudeHandler(event) {
-        setLongitude(event.target.value)
+        longitudeKeeper.longitude = event.target.value;
     }
 
     function changeLatitudeHandler(event) {
-        setLatitude(event.target.value)
+        latitudeKeeper.latitude = event.target.value;
     }
 
     function handleSubmitWrapper() {
         const stationData = {
-            name: name,
-            longitude: longitude,
-            latitude: latitude
+            name: nameKeeper.name,
+            longitude: longitudeKeeper.longitude,
+            latitude: latitudeKeeper.latitude
         }
         handleSubmit(stationData);
     }
@@ -49,6 +49,7 @@ export default function StationManager({ handleSubmit, handleClose, open, ...pro
                         changeNameHandler={changeNameHandler}
                         changeLongitudeHandler={changeLongitudeHandler}
                         changeLatitudeHandler={changeLatitudeHandler}
+                        preset={newStationLocation}
                     />
                 </DialogContent>
                 <DialogActions>

@@ -67,7 +67,7 @@ export default function DataImport({ data, acceptableColumns, handleSubmit, ...p
                                     <FormHelperText>Wypełnij pole</FormHelperText>
                                 }
                             </FormControl>,
-                        selector: row => row[index]
+                        selector: row => row[index] //ATTENTION! This is quite hack-ish, causes warning which can be ignored
                     })
             });
         return fileColumns;
