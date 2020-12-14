@@ -197,12 +197,11 @@ export default function StationsComparison({ ...props }) {
     console.log("StationComparison, chartColumns:", chartColumns);
     console.log("StationComparison, timeRange:", timeRange);
     console.log("StationComparison, pickedTimeRange:", pickedTimeRange);
+    console.log("StationComparison, picked valueRanges:", valueRanges);
 
     //TODO może wydrębić wykresy do osobnego komponentu?
     //TODO dodać dane stacji pod tekstem 'Porównanie stacji o identyfikatorach...'
 
-    // TODO ZORBIĆ min i max wartości pomiaru zmiennymi!
-    // TODO DODAĆ CZAS
     return (
         <div>
             {alertMsg != null &&
@@ -248,7 +247,7 @@ export default function StationsComparison({ ...props }) {
                                 <Grid container key={index}>
                                     <Grid item xs={1}>
                                         <Box bgcolor={style.color} color={style.color} className={styles.colorBox}>
-                                            '   '
+                                            ' '
                                         </Box>
                                     </Grid>
                                     <Grid item>
