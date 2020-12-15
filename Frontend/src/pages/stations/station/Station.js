@@ -12,6 +12,7 @@ import {
 } from "../../util/REST/paths";
 import GET from "../../util/REST/GET";
 import * as Papa from 'papaparse';
+import MeasurementDataDisplay from "./measurementDataDisplay/MeasurementDataDisplay";
 
 export default function Station(props) {
     console.log("Station, props:", props);
@@ -23,7 +24,6 @@ export default function Station(props) {
     const [alertMsg, setAlertMsg] = React.useState(null);
     const [infoMsg, setInfoMsg] = React.useState(null);
     const [successMsg, setSuccessMsg] = React.useState(null);
-    const [percentage, setPercentage] = React.useState(null);
 
     React.useEffect(() => {
         function onStationSuccess(json) {
@@ -76,7 +76,6 @@ export default function Station(props) {
     function handleUpload(filesList) {
         setAlertMsg(null);
         setSuccessMsg(null);
-        setPercentage(null);
         setMeasurements([]);
         const file = filesList[0];      //assuming multipleFiles={false}
         setUploadedFile(file);
@@ -122,11 +121,9 @@ export default function Station(props) {
                 setInfoMsg(null);
                 setMeasurements([]);
                 setUploadedFile(null);
-                setPercentage(100);
             } else {
                 console.log("Import danych zakończył się niepowodzeniem. Request ", request);
                 setAlertMsg("Wystąpił błąd podczas wysyłania danych pomiarów. Kod odpowiedzi: " + request.status)
-                setPercentage(null);
             }
         }
     }
@@ -153,13 +150,15 @@ export default function Station(props) {
     console.log("Station, measurements:", measurements);
     console.log("Station, alertMsg:", alertMsg);
 
+    //TODO dodać dane z czujnika w tabeli
+
     return (
         <div>
             <h1>Stacja {stationData != null && stationData.name}</h1>
             {stationData != null && alertMsg == null && infoMsg == null &&
                 <div>
-                    <h2>Długość geograficzna: {stationData.longitude}</h2>
                     <h2>Szerokość geograficzna: {stationData.latitude}</h2>
+                    <h2>Długość geograficzna: {stationData.longitude}</h2>
                     <h2>Unikalny identyfikator stacji: {stationData.id}</h2>
                     <ReactFileReader
                         handleFiles={handleUpload}
@@ -171,15 +170,18 @@ export default function Station(props) {
                     {measurements.length > 0 &&
                         acceptableColumns != null &&
                         successMsg == null &&
-                        percentage == null &&
                         <DataImport
                             acceptableColumns={acceptableColumns}
                             data={measurements}
                             handleSubmit={handleSubmit}
                         />
-
                     }
                 </div>
+            }
+            {stationData != null && alertMsg == null &&
+                <MeasurementDataDisplay
+                    stationId={stationId}
+                />
             }
             {infoMsg != null &&
                 <Alert severity="info">{infoMsg}</Alert>
