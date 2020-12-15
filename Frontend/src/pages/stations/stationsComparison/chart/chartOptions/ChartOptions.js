@@ -1,8 +1,6 @@
 import React from "react";
 
 import CheckBox from '@material-ui/core/CheckBox';
-import FormLabel from '@material-ui/core/FormLabel';
-import FormControl from '@material-ui/core/FormControl';
 import FormGroup from '@material-ui/core/FormGroup';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import TextField from '@material-ui/core/TextField';
@@ -118,7 +116,7 @@ export default function ChartOptions({ asCheckBoxes, onCheckBoxesChange, asTimeP
     console.log("ChartOptions, endDate: ", endDate);
     console.log("ChartOptions, endTime: ", endTime);
 
-    //TODO jeszcze czas!
+    //TODO dodać możliwość wybrania typu wykresu
     return (
 
         <FormGroup>
