@@ -26,23 +26,24 @@ export default function StationsComparison({ ...props }) {
     const [station1MeasurementData, setStation1MeasurementData] = React.useState(null);
     const [station2MeasurementData, setStation2MeasurementData] = React.useState(null);
     const [seriesList, setSeriesList] = React.useState([]);
-    const [timeRange, setTimeRange] = React.useState(null);
+    const [timeRangeUserChose, setTimeRangeUserChose] = React.useState(null);
+    const [timeRangeDefault, setTimeRangeDefault] = React.useState(null);
     const [alertMsg, setAlertMsg] = React.useState(null);
     const referencialStationField = useField(station1Id);
 
-    function onTimePeriodChange(newTimePeriod) {
+    function onTimePeriodManualChange(newTimePeriod) {
         console.log("StationComparison, onTimePeriodChange, newTimePeriod:", newTimePeriod);
-        setTimeRange(new TimeRange(...newTimePeriod));
+        setTimeRangeUserChose(new TimeRange(...newTimePeriod));
     }
 
     //TODO Wypadałoby rozdzdzielić stację 1 od stacji 2 zeby po zmianie jednej pobierała siętylko ta nowa a nie obie
     React.useEffect(() => {
         function onGetSuccess(json, setter) {
             console.log("Station, fetchData SUCCESS, json: ", json);
-            if (json != null)
-                setAlertMsg(null);
-            else
+            if (json == null)
                 setAlertMsg("Nie znaleziono danych stacji o id: " + station1Id);
+            // else
+            // setAlertMsg(null);
             setter(json);
         }
         function onGetError(error, stationId, setter) {
@@ -81,7 +82,7 @@ export default function StationsComparison({ ...props }) {
             console.log("StationComparison, fetch columns SUCCESS, json: ", json);
             if (json != null) {
                 setMeasurementTypes(json.filter(measurementType => measurementType != 'TIME' && measurementType != 'time'));
-                setAlertMsg(null);
+                // setAlertMsg(null);
             }
             else {
                 setMeasurementTypes(null);
@@ -101,25 +102,28 @@ export default function StationsComparison({ ...props }) {
     );
 
     function pickTimerange() {
-        if (timeRange != null)
-            return timeRange;
+        if (timeRangeUserChose != null)
+            return timeRangeUserChose;
         let seriesHavingTimerange = seriesList.find(series => series.timerange() != null)
         if (seriesHavingTimerange == null)
             return null;
-        return seriesHavingTimerange.timerange();
+        const tr = seriesHavingTimerange.timerange();
+        //to avoid "too many rerenders error" - apparently .timerange()
+        // returns new object each time and react's shallow comparison sees it as a new state
+        if (timeRangeDefault == null || timeRangesDiffer(tr, timeRangeDefault))
+            setTimeRangeDefault(tr);
+        return tr;
     }
 
-    let pickedTimeRange = pickTimerange();
-    
-
-    const chartStyle = null;
+    let pickedTimeRange = pickTimerange();      //TODO this time range is sometimes picked wrong
 
     console.log("StationComparison, seriesList:", seriesList);
-    console.log("StationComparison, timeRange:", timeRange);
-    console.log("StationComparison, pickedTimeRange:", pickedTimeRange);
+    console.log("StationComparison, timeRangeUserChose:", timeRangeUserChose);
+    if (pickedTimeRange != null)
+        console.log("StationComparison, pickedTimeRange:", pickedTimeRange.toString());
 
-    let station1NameInBracket = station1Data != null ? '('+station1Data.name + ')' : '';
-    let station2NameInBracket = station2Data != null ? '('+station2Data.name + ')' : '';
+    let station1NameInBracket = station1Data != null ? '(' + station1Data.name + ')' : '';
+    let station2NameInBracket = station2Data != null ? '(' + station2Data.name + ')' : '';
     //TODO może wydrębić wykresy do osobnego komponentu?
     //TODO dodać dane stacji pod tekstem 'Porównanie stacji o identyfikatorach...'
     //TODO dodać więcej typów wykresów, np słupkowy https://software.es.net/react-timeseries-charts/#/example/barchart
@@ -139,18 +143,30 @@ export default function StationsComparison({ ...props }) {
                             label="Stacja referencyjna"
                         />
                     </Grid>
-                    <Chart
-                        stationIds={[station1Id, station2Id]}
-                        measurementTypes={measurementTypes}
-                        station1MeasurementData = {station1MeasurementData}
-                        station2MeasurementData = {station2MeasurementData}
-                        seriesList={seriesList}
-                        setSeriesList={setSeriesList}
-                        onTimePeriodChange={onTimePeriodChange}
-                        pickedTimeRange={pickedTimeRange}
-                    />
+                    <Grid item xs={12}>
+                        <Chart
+                            stationIds={[station1Id, station2Id]}
+                            measurementTypes={measurementTypes}
+                            station1MeasurementData={station1MeasurementData}
+                            station2MeasurementData={station2MeasurementData}
+                            seriesList={seriesList}
+                            setSeriesList={setSeriesList}
+                            onTimePeriodManualChange={onTimePeriodManualChange}
+                            pickedTimeRange={pickedTimeRange}
+                        />
+                    </Grid>
                 </Grid>
             }
         </div>
     )
+}
+
+function timeRangesDiffer(tr1, tr2) {
+    const begin1 = tr1.begin().valueOf();    //returns number of milliseconds since "begginning of time"
+    if (begin1 !== tr2.begin().valueOf())
+        return true
+    const end1 = tr1.end().valueOf();    //returns number of milliseconds since "begginning of time"
+    if (end1 !== tr2.end().valueOf())
+        return true;
+    return false;
 }
