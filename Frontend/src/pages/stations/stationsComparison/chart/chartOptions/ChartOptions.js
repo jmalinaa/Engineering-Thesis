@@ -8,14 +8,14 @@ import PropTypes from 'prop-types';
 
 import makeStyles from './styles';
 
-export default function ChartOptions({ asCheckBoxes, onCheckBoxesChange, asTimePeriod, onTimePeriodChange, ...props }) {
+export default function ChartOptions({ asCheckBoxes, onCheckBoxesChange, asTimePeriod, onTimePeriodManualChange, ...props }) {
 
     const classes = makeStyles();
 
     let checkBoxFields = new Array(asCheckBoxes.length).fill(false);
 
     const [checkBoxesValues] = React.useState(checkBoxFields);  //keep in mind this is just the initial values
-    const [dateTimeValues] = React.useState([]);
+    const [dateTimeValues, setDateTimeValues] = React.useState([]);
     const [refershValue, setRefreshValue] = React.useState(0);
 
     function refresh() {
@@ -23,8 +23,12 @@ export default function ChartOptions({ asCheckBoxes, onCheckBoxesChange, asTimeP
     }
 
     if (dateTimeValues.length < 2 && asTimePeriod != null) {
-        dateTimeValues[0] = asTimePeriod[0];
-        dateTimeValues[1] = asTimePeriod[1];
+        setDateTimeValues(asTimePeriod);
+        // dateTimeValues[0] = asTimePeriod[0];
+        // dateTimeValues[1] = asTimePeriod[1];
+    }
+    if (asTimePeriod != null && timePeriodsDiffer(dateTimeValues, asTimePeriod)) {
+        setDateTimeValues(asTimePeriod);
     }
 
     function onCheckBoxChange(index, checked) {
@@ -36,26 +40,30 @@ export default function ChartOptions({ asCheckBoxes, onCheckBoxesChange, asTimeP
 
     function setDateFromString(dateObject, newDateAsString) {
         let [fullYear, month, day] = newDateAsString.split('-');
-        dateObject.setFullYear(fullYear);
-        dateObject.setMonth(month, day);
+        if (!isBlankString(fullYear) && !isBlankString(month) && !isBlankString(day)) {
+            dateObject.setFullYear(fullYear);
+            dateObject.setMonth(month - 1, day);    //months are 0-base indexed
+        }
     }
 
     function setTimeFromString(dateObject, newTime) {
-        let [hours, minutes] = newTime.split(':')
+        let [hours, minutes] = newTime.split(':');
+        hours = hours != null && hours != '' ? hours : '00'
+        minutes = minutes != null && minutes != '' ? minutes : '00'
         dateObject.setHours(hours, minutes);
     }
 
     function onDateChange(index, newDate) {
         console.log("ChartOptions, onDateChange: ", index, newDate);
-        setDateFromString(dateTimeValues[index], newDate);
-        onTimePeriodChange(dateTimeValues);
+        setDateFromString(dateTimeValues[index], newDate);  //not a state change!
+        onTimePeriodManualChange(dateTimeValues);
         refresh();
     }
 
     function onTimeChange(index, value) {
         console.log("ChartOptions, onTimeChange: ", index, value);
-        setTimeFromString(dateTimeValues[index], value);
-        onTimePeriodChange(dateTimeValues);
+        setTimeFromString(dateTimeValues[index], value);    //not a state change!
+        onTimePeriodManualChange(dateTimeValues);
         refresh();
     }
 
@@ -195,9 +203,31 @@ export default function ChartOptions({ asCheckBoxes, onCheckBoxesChange, asTimeP
     )
 }
 
+function isBlankString(string) {
+    return string == null || string == '';
+}
+
+function timePeriodsDiffer(tr1, tr2) {
+    if (tr1 == tr2)
+        return false
+    if (tr1 == null && tr2 != null)
+        return true;
+    if (tr1 != null && tr2 == null)
+        return true;
+    if (tr1.length != tr2. length)
+        return true;
+    const begin1 = tr1[0].valueOf();           //returns number of milliseconds since "begginning of time"
+    if (begin1 !== tr2[0].valueOf())
+        return true
+    const end1 = tr1[1].valueOf();
+    if (end1 !== tr2[1].valueOf())
+        return true;
+    return false;
+}
+
 ChartOptions.propTypes = {
     asCheckboxes: PropTypes.arrayOf(PropTypes.string),
     onCheckBoxesChange: PropTypes.func,
     // asTimePeriod: TODO co to będzie? - do ustalenia
-    onTimePeriodChange: PropTypes.func,
+    onTimePeriodManualChange: PropTypes.func,
 }

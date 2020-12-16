@@ -182,6 +182,7 @@ function Stations({ location, props }) {
     //TODO dodać wyszukiwanie! nie ma tego w pakiecie, więc trzeba będzie dodać akcję (do listy 'actions')
     //moze jednak jest rozszerzenie: https://www.npmjs.com/package/react-data-table-component-extensions
 
+    //TODO może by tak focusować mapę na klikniętej stacji?
     return (
         <div className={classes.root}>
             <Grid container spacing={2} justify="space-around">

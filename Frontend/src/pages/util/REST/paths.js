@@ -5,3 +5,4 @@ export const ADD_STATION_PATH = ALL_STATIONS_PATH + "add/";
 export const ALL_MEASUREMENTS_PATH = BASE_PATH + "measurements/";
 export const COLUMN_NAMES_PATH = ALL_MEASUREMENTS_PATH + "columnNames";
 export const IMPORT_MEASUREMENTS_FILE_PATH = ALL_MEASUREMENTS_PATH + 'import';
+export const CALIBRATION_PATH = BASE_PATH + '/calibration/12&13';
