@@ -8,12 +8,14 @@ import {
     STATION_PATH,
     COLUMN_NAMES_PATH,
     ALL_MEASUREMENTS_PATH,
+    // CALIBRATION_PATH,
 } from "../../util/REST/paths";
 import GET from "../../util/REST/GET";
 import { TimeRange } from "pondjs";
 import makeStyles from './styles';
 import useField from "../../../materialUiWrappers/useField";
 import DefaultSelectField from "../../../materialUiWrappers/DefaultSelectField";
+import CalibrationResults from "./calibrationResults/CalibrationResults";
 
 export default function StationsComparison({ ...props }) {
     console.log("StationComparison, props:", props);
@@ -29,10 +31,11 @@ export default function StationsComparison({ ...props }) {
     const [timeRangeUserChose, setTimeRangeUserChose] = React.useState(null);
     const [timeRangeDefault, setTimeRangeDefault] = React.useState(null);
     const [alertMsg, setAlertMsg] = React.useState(null);
+    const [calibration, setCalibration] = React.useState(null);
     const referencialStationField = useField(station1Id);
 
     function onTimePeriodManualChange(newTimePeriod) {
-        console.log("StationComparison, onTimePeriodChange, newTimePeriod:", newTimePeriod);
+        console.log("StationComparison, onTimePeriodManualChange, newTimePeriod:", newTimePeriod);
         setTimeRangeUserChose(new TimeRange(...newTimePeriod));
     }
 
@@ -101,6 +104,53 @@ export default function StationsComparison({ ...props }) {
     }, []
     );
 
+    React.useEffect(() => {
+        //TODO UNCOMMENT when endpoint is finished
+        // function onCalibrationSuccess(json) {
+        //     console.log("StationComparison, fetch calibration SUCCESS, json: ", json);
+        //     if (json != null) {
+        //         setCalibration(json);
+        //         // setAlertMsg(null);
+        //     }
+        //     else {
+        //         setCalibration(null);
+        //         setAlertMsg("Nie znaleziono nazw kolumn!");
+        //     }
+        // }
+        // function onCalibrationError(error) {
+        //     console.log("StationComparison, fetch calibration error: ", error);
+        //     if (error.message != null)
+        //         setAlertMsg(error.message);
+        //     else
+        //         setAlertMsg(error.toString());
+        //     setCalibration(null);
+        // }
+        // GET(CALIBRATION_PATH, onCalibrationSuccess, onCalibrationError);
+        //TODO MOCK STARTS HERE
+        const calibrationMock = {
+            columnNames: ['temp', 'humi', 'pm1', 'pm25', 'pm10'],
+            rowNames: ['temp', 'humi', 'pm1', 'pm25', 'pm10'],
+            values: [
+                ['X', -0.83, -0.31, -0.33, -0.34],
+                [-0.83, 'X', -0.47, -0.49, -0.50],
+                [-0.31, 0.47, 'X', -0.998, -0.996],
+                [-0.33, 0.49, -0.998, 'X', -0.999],
+                [-0.34, 0.50, -0.996, -0.999, 'X']
+            ]
+        }
+        // TODO MOCK ENDS HERE
+        const rows = [];
+        calibrationMock.values.forEach((valuesList, index) => {
+            const row = [calibrationMock.rowNames[index]].concat(valuesList);    //add row name at the beginning of the row
+            rows.push(row);
+        })
+        calibrationMock.values = rows;
+        calibrationMock.columnNames = ['agh'].concat(calibrationMock.columnNames);
+
+        setCalibration(calibrationMock);
+    }, [station1Id, station2Id]
+    );
+
     function pickTimerange() {
         if (timeRangeUserChose != null)
             return timeRangeUserChose;
@@ -118,13 +168,13 @@ export default function StationsComparison({ ...props }) {
     let pickedTimeRange = pickTimerange();      //TODO this time range is sometimes picked wrong
 
     console.log("StationComparison, seriesList:", seriesList);
-    console.log("StationComparison, timeRangeUserChose:", timeRangeUserChose);
+    if (timeRangeUserChose != null)
+        console.log("StationComparison, timeRangeUserChose:", timeRangeUserChose.toString());
     if (pickedTimeRange != null)
         console.log("StationComparison, pickedTimeRange:", pickedTimeRange.toString());
 
     let station1NameInBracket = station1Data != null ? '(' + station1Data.name + ')' : '';
     let station2NameInBracket = station2Data != null ? '(' + station2Data.name + ')' : '';
-    //TODO może wydrębić wykresy do osobnego komponentu?
     //TODO dodać dane stacji pod tekstem 'Porównanie stacji o identyfikatorach...'
     //TODO dodać więcej typów wykresów, np słupkowy https://software.es.net/react-timeseries-charts/#/example/barchart
 
@@ -155,6 +205,13 @@ export default function StationsComparison({ ...props }) {
                             pickedTimeRange={pickedTimeRange}
                         />
                     </Grid>
+                    {calibration != null &&
+                        <Grid item xs={6}>
+                            <CalibrationResults
+                                calibration={calibration}
+                            />
+                        </Grid>
+                    }
                 </Grid>
             }
         </div>
