@@ -8,7 +8,7 @@ public interface MeasurementRepositoryCustom {
 
     List<MeasurementsCompare> getTimePairs(long station1Id, long station2Id);
 
-    List<String> getMeasurementTypesNoByStationId(long stationId);
+    List<String> getMeasurementTypesByStationId(long stationId);
 
     List<Object[]> getPollutionAndWeatherForMeasurements(long measurement1Id, long measurement2Id);
 }

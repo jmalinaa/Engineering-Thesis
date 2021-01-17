@@ -3,150 +3,218 @@ package engineeringthesis.service;
 import com.github.rcaller.rstuff.RCaller;
 import com.github.rcaller.rstuff.RCallerOptions;
 import com.github.rcaller.rstuff.RCode;
-import engineeringthesis.model.dto.calibration.CalibrationResult;
-import engineeringthesis.model.dto.calibration.CorrelationResult;
-import engineeringthesis.model.dto.calibration.MeasurementsCompare;
+import engineeringthesis.model.dto.calibration.*;
+import engineeringthesis.model.jpa.enums.PollutionMeasurementType;
 import engineeringthesis.repository.measurement.MeasurementRepository;
-import engineeringthesis.util.RUtils;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
-import org.renjin.script.RenjinScriptEngine;
-import org.renjin.script.RenjinScriptEngineFactory;
-import org.renjin.sexp.ListVector;
-import org.renjin.sexp.SEXP;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.net.URISyntaxException;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 public class CalibrationService {
 
-    @PersistenceContext
-    private EntityManager em;
-
     @Autowired
     private MeasurementRepository measurementRepository;
 
-    public CalibrationResult getCalibration(long stationId1, long stationId2) {
-        List<String> station1MeasurementTypes = measurementRepository.getMeasurementTypesNoByStationId(stationId1);
-        List<String> station2MeasurementTypes = measurementRepository.getMeasurementTypesNoByStationId(stationId2);
-        List<MeasurementsCompare> measurements = measurementRepository.getTimePairs(stationId1, stationId2);
+    private static final double P_VALUE = 0.05;
+    private final CalibrationResult result = new CalibrationResult();
+    private double[][] referenceStationData;
+    private double[][] stationToCalibrateData;
+    private List<String> referenceStationMeasurementTypes;
+    private List<String> stationToCalibrateMeasurementTypes;
 
-        double[][] station1data = new double[station1MeasurementTypes.size()][measurements.size()];
-        double[][] station2data = new double[station2MeasurementTypes.size()][measurements.size()];
-        Date[] dates = new Date[measurements.size()];
+    public CalibrationResult getCalibration(long referenceStationId, long stationToCalibrateId) {
+        referenceStationMeasurementTypes = measurementRepository.getMeasurementTypesByStationId(referenceStationId);
+        stationToCalibrateMeasurementTypes = measurementRepository.getMeasurementTypesByStationId(stationToCalibrateId);
+        result.setSameMeasurementTypes(prepareMapOfSameMeasurementTypes());
 
+        List<MeasurementsCompare> measurements = measurementRepository.getTimePairs(referenceStationId, stationToCalibrateId);
+
+        referenceStationData = new double[referenceStationMeasurementTypes.size()][measurements.size()];
+        stationToCalibrateData = new double[stationToCalibrateMeasurementTypes.size()][measurements.size()];
+        fetchMeasurementsData(measurements);
+        Map<String, double[]> measurementDifferencesMap = prepareMeasurementDifferencesData();
+
+        Map<String, Integer> maxRowAndCol = findCorrelationValues(measurementDifferencesMap);
+
+            for (Map.Entry<String, Integer> e : maxRowAndCol.entrySet()) {
+                double[] diffArray = measurementDifferencesMap.get(e.getKey());
+                double[] toCalibrateArray = stationToCalibrateData[e.getValue()];
+                double[] varResult = prepareResult(diffArray, toCalibrateArray);
+                String key = e.getKey();
+            }
+
+        return result;
+    }
+
+    private void fetchMeasurementsData(List<MeasurementsCompare> measurements) {
         int i = 0;
         for (MeasurementsCompare m : measurements) {
-            dates[i] = m.getTime1(); //DateUtil.getDateBeetwen(m.getTime1(), m.getTime2());
-            for (Object[] ob : measurementRepository.getPollutionAndWeatherForMeasurements(m.getM1(), m.getM2())) {
-                int row1 = station1MeasurementTypes.indexOf(String.valueOf(ob[0]));
-                int row2 = station2MeasurementTypes.indexOf(String.valueOf(ob[0]));
-                Object o1 = ob[1];
-                Object o2 = ob[2];
-                if (o1 != null) {
-                    station1data[row1][i] = (double) ob[1];
+            for (Object[] measurementsData : measurementRepository.getPollutionAndWeatherForMeasurements(m.getM1(), m.getM2())) {
+                int row1 = referenceStationMeasurementTypes.indexOf(String.valueOf(measurementsData[0]));
+                int row2 = stationToCalibrateMeasurementTypes.indexOf(String.valueOf(measurementsData[0]));
+                Object referenceStationMeasurementValue = measurementsData[1];
+                Object stationToCalibrateMeasurementValue = measurementsData[2];
+                if (referenceStationMeasurementValue != null) {
+                    referenceStationData[row1][i] = (double) referenceStationMeasurementValue;
                 }
-                if (o2 != null) {
-                    station2data[row2][i] = (double) ob[2];
+                if (stationToCalibrateMeasurementValue != null) {
+                    stationToCalibrateData[row2][i] = (double) stationToCalibrateMeasurementValue;
                 }
             }
             i++;
         }
-
-        CorrelationResult correlationResult = findCorrelationValues(station1data, station2data);
-        correlationResult.setColumnNames(station2MeasurementTypes);
-        correlationResult.setRowNames(station1MeasurementTypes);
-
-        //double[][] dataFrame = prepareDf(correlationResult.getMaxRow(), correlationResult.getMaxCol(), station1data, station2data);
-
-        try {
-            adf(station1data, station2data);
-        } catch (ScriptException e) {
-            e.printStackTrace();
-        }
-
-        try {
-            var(station1data[correlationResult.getMaxRow()], station2data[correlationResult.getMaxCol()]);
-        } catch (IOException | URISyntaxException e) {
-            e.printStackTrace();
-        }
-
-        return CalibrationResult.builder()
-                .correlationResult(correlationResult)
-                .build();
     }
 
-    private CorrelationResult findCorrelationValues(double[][] station1data, double[][] station2data) {
-        SpearmansCorrelation correlation = new SpearmansCorrelation();
-        double[][] correlationArray = new double[station1data.length][station2data.length];
-        double maxCorrel = 0.0;
-        int maxRow = 0;
-        int maxCol = 0;
-        for (int i = 0; i < station1data.length; i++) {
-            for (int j = 0; j < station2data.length; j++) {
-                double coef = correlation.correlation(station1data[i], station2data[j]);
-                if (coef > maxCorrel) {
-                    maxCorrel = coef;
-                    maxRow = i;
-                    maxCol = j;
+    private Map<String, PairOfIds> prepareMapOfSameMeasurementTypes() {
+        Map<String, PairOfIds> sameMeasurementTypeMap = new HashMap<>();
+        for (int rId = 0; rId < referenceStationMeasurementTypes.size(); rId++) {
+            for (int cId = 0; cId < stationToCalibrateMeasurementTypes.size(); cId++) {
+                if (referenceStationMeasurementTypes.get(rId).equalsIgnoreCase(stationToCalibrateMeasurementTypes.get(cId))) {
+                    sameMeasurementTypeMap.put(referenceStationMeasurementTypes.get(rId), new PairOfIds(rId, cId));
                 }
-                correlationArray[i][j] = coef;
             }
         }
-        return CorrelationResult.builder().correlationValues(correlationArray)
-                .maxRow(maxRow)
-                .maxCol(maxCol)
-                .build();
-
+        return sameMeasurementTypeMap;
     }
 
-    private void adf(double[][] station1data, double[][] station2data) throws ScriptException {
-        RenjinScriptEngineFactory factory = new RenjinScriptEngineFactory();
-        ScriptEngine engine = factory.getScriptEngine();
-        for (int i = 0; i < station1data.length; i++) {
-            engine.put("input", station1data[i]);
-            SEXP res = (SEXP) engine.eval("PP.test(input)");
-            System.out.println(res.getClass());
+    private Map<String, double[]> prepareMeasurementDifferencesData() {
+        List<String> pollutionMeasurementTypes = filterPollutionMeasurementTypes(new ArrayList<>(result.getSameMeasurementTypes().keySet()));
+        Map<String, double[]> diffMap = new HashMap<>();
+        for (Map.Entry<String, PairOfIds> e : result.getSameMeasurementTypes().entrySet()) {
+            calculateDifferencesForSingleType(diffMap, e.getKey(), pollutionMeasurementTypes,
+                    referenceStationData[e.getValue().getReferenceDataColumnId()],
+                    stationToCalibrateData[e.getValue().getToCalibrateDataColumnId()]);
         }
-        for (int j = 0; j < station2data.length; j++) {
-            engine.put("input", station2data[j]);
-            SEXP res = (SEXP) engine.eval("PP.test(input)");
-            System.out.println(res.getClass());
-        }
-
+        return diffMap;
     }
 
-    private void var(double[] input1,double[] input2) throws IOException, URISyntaxException {
-       // String fileContent = RUtils.getVarScriptContent();
+    private List<String> filterPollutionMeasurementTypes(List<String> allTypes) {
+        List<String> pollutionTypes = PollutionMeasurementType.getListOfNames();
+        return allTypes.stream().filter(pollutionTypes::contains).collect(Collectors.toList());
+    }
+
+    private void calculateDifferencesForSingleType(Map<String, double[]> diffMap, String name,
+                                                       List<String> pollutionMeasurementTypes,
+                                                       double[] referenceData, double[] dataToCalibrate) {
+        int dataSize = referenceData.length;
+        BigDecimal diffSum = BigDecimal.ZERO;
+        double maxDiff = 0.0;
+        double[] diffArray = new double[dataSize];
+        boolean saveToDiffMap = pollutionMeasurementTypes.contains(name);
+
+        for (int i = 0; i < dataSize; i++) {
+            double diff = referenceData[i] - dataToCalibrate[i];
+            diffSum = diffSum.add(BigDecimal.valueOf(diff));
+            if (diff > maxDiff) {
+                maxDiff = diff;
+            }
+            if (saveToDiffMap) {
+                diffArray[i] = diff;
+            }
+        }
+        if (saveToDiffMap) {
+            diffMap.put(name, diffArray);
+        }
+
+        double meanDiff = diffSum.divide(new BigDecimal(dataSize), RoundingMode.HALF_UP).doubleValue();
+        result.getMeanAndMaxDiffMap().put(name, new MeanAndMaxDiff(meanDiff, maxDiff));
+    }
+
+    private Map<String, Integer> findCorrelationValues(Map<String, double[]> measurementDifferencesMap) {
+        SpearmansCorrelation sc = new SpearmansCorrelation();
+        double[][] correlationArray = new double[measurementDifferencesMap.size()][stationToCalibrateData.length];
+        Map<String, Integer> maxRowAndCol = new HashMap<>();
+        int i = 0;
+        for (Map.Entry<String, double[]> e : measurementDifferencesMap.entrySet()) {
+            double maxCoef = 0;
+            int maxCol = -1;
+            for (int j = 0; j < stationToCalibrateData.length; j++) {
+                double coef = Math.abs(sc.correlation(stationToCalibrateData[j], e.getValue()));
+                correlationArray[i][j] = coef;
+                if (coef > maxCoef) {
+                    maxCoef = coef;
+                    maxCol = j;
+                }
+            }
+            maxRowAndCol.put(e.getKey(), maxCol);
+            i++;
+        }
+
+        result.setCorrelationResult(CorrelationResult.builder()
+                .correlationValues(correlationArray)
+                .rowNames(new ArrayList<>(measurementDifferencesMap.keySet()))
+                .columnNames(stationToCalibrateMeasurementTypes)
+                .build());
+
+        return maxRowAndCol;
+    }
+
+    private double[] prepareResult(double[] diffArray, double[] toCalibrateArray) {
+        double diffArrayPValue = adfTest(diffArray);
+        double toCalibrateArrayPValue = adfTest(toCalibrateArray);
+        if(diffArrayPValue > P_VALUE || toCalibrateArrayPValue > P_VALUE) {
+            double[] stationaryDiffArray = makeStationary(diffArray);
+            double[] stationaryToCalibrateArray = makeStationary(toCalibrateArray);
+            double[] varResult = var(stationaryToCalibrateArray, stationaryDiffArray);
+            return invertTransformation(varResult);
+        } else {
+            return var(diffArray, toCalibrateArray);
+        }
+    }
+
+    private double adfTest(double[] input) {
+        RCode code = RCode.create();
+        code.addDoubleArray("input", input);
+        code.R_require("tseries");
+        code.addRCode("s <- adf.test(input)");
+        RCaller caller = RCaller.create(code, RCallerOptions.create());
+        caller.runAndReturnResult("s");
+        return caller.getParser().getAsDoubleArray("p_value")[0];
+    }
+
+    private double[] makeStationary(double[] input) {
+        RCode code = RCode.create();
+        code.addDoubleArray("input", input);
+        code.addRCode("res <- diff(input)");
+        RCaller caller = RCaller.create(code, RCallerOptions.create());
+        caller.runAndReturnResult("res");
+        return caller.getParser().getAsDoubleArray("res");
+    }
+
+    private double[] var(double[] input1, double[] input2) {
         RCode code = RCode.create();
         code.addDoubleArray("input1", input1);
         code.addDoubleArray("input2", input2);
-        //code.addRCode(fileContent);
-        code.addRCode("library(vars)");
+        code.R_require("vars");
         code.addRCode("v1 <- cbind(input1, input2)");
-        code.addRCode("model <- VAR(v1, p = 2, type = 'const', season = NULL, exog = NULL)");
-        code.addRCode("res <- summary(model)");
+        code.addRCode("select <- VARselect(v1, type = 'const')");
+        code.addRCode("p_selected <- unname(select$selection[1])");
+        code.addRCode("model <- VAR(v1, p = p_selected, type = 'const', season = NULL, exog = NULL)");
+        code.addRCode("res <- fitted(model$varresult$input1)");
         RCaller caller = RCaller.create(code, RCallerOptions.create());
         caller.runAndReturnResult("res");
-        double[] res = caller.getParser().getAsDoubleArray("res");
+        return caller.getParser().getAsDoubleArray("res");
+    }
 
-//        RenjinScriptEngineFactory factory = new RenjinScriptEngineFactory();
-//        ScriptEngine engine = factory.getScriptEngine();
-//        engine.eval("library(vars)");
-//        engine.put("input1", input1);
-//        engine.put("input2", input2);
-//        engine.eval("v1 <- cbind(input1, input2)");
-//        engine.eval("Model1 <- VAR(v1, p = 2, type = 'const', season = NULL, exog = NULL)");
-//        SEXP res = (SEXP) engine.eval("summary(Model1)");
-//        System.out.println(res.getClass());
+    private double[] invertTransformation(double[] input) {
+        RCode code = RCode.create();
+        code.addDoubleArray("input", input);
+        code.addRCode("res <- cumsum(input)");
+        RCaller caller = RCaller.create(code, RCallerOptions.create());
+        caller.runAndReturnResult("res");
+        return caller.getParser().getAsDoubleArray("res");
     }
 }

@@ -51,7 +51,7 @@ public class MeasurementRepositoryImpl extends AbstractRepository implements Mea
         return entityManager.createQuery(cq).getResultList();
     }
 
-    public List<String> getMeasurementTypesNoByStationId(long stationId) {
+    public List<String> getMeasurementTypesByStationId(long stationId) {
         return entityManager.createNativeQuery(
                 "SELECT DISTINCT px.measurement_type " +
                             "FROM pollution px " +

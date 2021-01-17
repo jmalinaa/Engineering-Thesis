@@ -12,6 +12,4 @@ public class CorrelationResult {
     private List<String> columnNames;
     private List<String> rowNames;
     private double[][] correlationValues;
-    private int maxRow;
-    private int maxCol;
 }
