@@ -4,18 +4,17 @@ import com.github.rcaller.rstuff.RCaller;
 import com.github.rcaller.rstuff.RCallerOptions;
 import com.github.rcaller.rstuff.RCode;
 import engineeringthesis.model.dto.calibration.*;
+import engineeringthesis.model.jpa.Measurement;
+import engineeringthesis.model.jpa.Pollution;
+import engineeringthesis.model.jpa.Station;
 import engineeringthesis.model.jpa.enums.PollutionMeasurementType;
 import engineeringthesis.repository.measurement.MeasurementRepository;
 import org.apache.commons.math3.stat.correlation.SpearmansCorrelation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.script.ScriptException;
-import java.io.File;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -27,6 +26,12 @@ public class CalibrationService {
 
     @Autowired
     private MeasurementRepository measurementRepository;
+    @Autowired
+    private MeasurementService measurementService;
+    @Autowired
+    private PollutionService pollutionService;
+    @Autowired
+    private StationService stationService;
 
     private static final double P_VALUE = 0.05;
     private final CalibrationResult result = new CalibrationResult();
@@ -34,32 +39,34 @@ public class CalibrationService {
     private double[][] stationToCalibrateData;
     private List<String> referenceStationMeasurementTypes;
     private List<String> stationToCalibrateMeasurementTypes;
+    private List<MeasurementsCompare> measurements;
 
     public CalibrationResult getCalibration(long referenceStationId, long stationToCalibrateId) {
         referenceStationMeasurementTypes = measurementRepository.getMeasurementTypesByStationId(referenceStationId);
         stationToCalibrateMeasurementTypes = measurementRepository.getMeasurementTypesByStationId(stationToCalibrateId);
         result.setSameMeasurementTypes(prepareMapOfSameMeasurementTypes());
 
-        List<MeasurementsCompare> measurements = measurementRepository.getTimePairs(referenceStationId, stationToCalibrateId);
+        measurements = measurementRepository.getTimePairs(referenceStationId, stationToCalibrateId);
 
         referenceStationData = new double[referenceStationMeasurementTypes.size()][measurements.size()];
         stationToCalibrateData = new double[stationToCalibrateMeasurementTypes.size()][measurements.size()];
-        fetchMeasurementsData(measurements);
+        fetchMeasurementsData();
         Map<String, double[]> measurementDifferencesMap = prepareMeasurementDifferencesData();
 
+        Station newStation = stationService.createChildStation(stationToCalibrateId);
         Map<String, Integer> maxRowAndCol = findCorrelationValues(measurementDifferencesMap);
 
-            for (Map.Entry<String, Integer> e : maxRowAndCol.entrySet()) {
-                double[] diffArray = measurementDifferencesMap.get(e.getKey());
-                double[] toCalibrateArray = stationToCalibrateData[e.getValue()];
-                double[] varResult = prepareResult(diffArray, toCalibrateArray);
-                String key = e.getKey();
-            }
+        for (Map.Entry<String, Integer> e : maxRowAndCol.entrySet()) {
+            double[] diffArray = measurementDifferencesMap.get(e.getKey());
+            double[] toCalibrateArray = stationToCalibrateData[e.getValue()];
+            double[] varResult = prepareResult(diffArray, toCalibrateArray);
+            saveResults(newStation, varResult, e.getValue());
+        }
 
         return result;
     }
 
-    private void fetchMeasurementsData(List<MeasurementsCompare> measurements) {
+    private void fetchMeasurementsData() {
         int i = 0;
         for (MeasurementsCompare m : measurements) {
             for (Object[] measurementsData : measurementRepository.getPollutionAndWeatherForMeasurements(m.getM1(), m.getM2())) {
@@ -107,8 +114,8 @@ public class CalibrationService {
     }
 
     private void calculateDifferencesForSingleType(Map<String, double[]> diffMap, String name,
-                                                       List<String> pollutionMeasurementTypes,
-                                                       double[] referenceData, double[] dataToCalibrate) {
+                                                   List<String> pollutionMeasurementTypes,
+                                                   double[] referenceData, double[] dataToCalibrate) {
         int dataSize = referenceData.length;
         BigDecimal diffSum = BigDecimal.ZERO;
         double maxDiff = 0.0;
@@ -165,7 +172,7 @@ public class CalibrationService {
     private double[] prepareResult(double[] diffArray, double[] toCalibrateArray) {
         double diffArrayPValue = adfTest(diffArray);
         double toCalibrateArrayPValue = adfTest(toCalibrateArray);
-        if(diffArrayPValue > P_VALUE || toCalibrateArrayPValue > P_VALUE) {
+        if (diffArrayPValue > P_VALUE || toCalibrateArrayPValue > P_VALUE) {
             double[] stationaryDiffArray = makeStationary(diffArray);
             double[] stationaryToCalibrateArray = makeStationary(toCalibrateArray);
             double[] varResult = var(stationaryToCalibrateArray, stationaryDiffArray);
@@ -217,4 +224,26 @@ public class CalibrationService {
         caller.runAndReturnResult("res");
         return caller.getParser().getAsDoubleArray("res");
     }
+
+    private void saveResults(Station newStation, double[] varResult, int typeNo) {
+        double[] toCalibrateData = stationToCalibrateData[typeNo];
+        String name = stationToCalibrateMeasurementTypes.get(typeNo);
+        PollutionMeasurementType pmt = PollutionMeasurementType.valueOf(name);
+        int lengthDiff = toCalibrateData.length - varResult.length;
+
+        for (int i = 0; i < varResult.length; i++) {
+            Measurement measurement = Measurement.builder()
+                    .station(newStation)
+                    .time(measurements.get(i + lengthDiff).getTime2())
+                    .build();
+            measurement.setId(measurementService.addMeasurement(measurement));
+
+            pollutionService.addPollution(Pollution.builder()
+                    .measurement(measurement)
+                    .measurementType(pmt)
+                    .measurementValue(varResult[i])
+                    .build());
+        }
+    }
+
 }

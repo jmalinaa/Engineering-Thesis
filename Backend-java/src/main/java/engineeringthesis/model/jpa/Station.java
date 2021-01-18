@@ -27,4 +27,11 @@ public class Station {
 
     @Column(name = "name")
     private String name;
+
+    @OneToOne
+    @JoinColumn(name = "parent_id", referencedColumnName = "id", unique = true)
+    private Station parentStation;
+
+    @OneToOne(targetEntity = Station.class, fetch = FetchType.LAZY, mappedBy = "parentStation", cascade = CascadeType.REMOVE)
+    private Station childStation;
 }

@@ -1,5 +1,6 @@
 package engineeringthesis.service;
 
+import engineeringthesis.model.jpa.Measurement;
 import engineeringthesis.model.jpa.Station;
 import engineeringthesis.repository.StationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +23,23 @@ public class StationService {
         return stationRepository.findById(id);
     }
 
-    public void addStation(Station newStation) {
-        stationRepository.save(newStation);
+    public Station addStation(Station newStation) {
+        Optional<Station> sameExisting = stationRepository.findByValues(newStation.getLatitude(), newStation.getLongitude(), newStation.getName(), newStation.getParentStation().getId());
+        if (sameExisting.isPresent()) {
+            return sameExisting.get();
+        } else {
+            stationRepository.save(newStation);
+            return newStation;
+        }
+    }
+
+    public Station createChildStation(long parentStationId) {
+        Station parentStation = getStationById(parentStationId).orElseThrow(AssertionError::new);
+        return addStation(Station.builder()
+                .latitude(parentStation.getLatitude())
+                .longitude(parentStation.getLongitude())
+                .name(parentStation.getName())
+                .parentStation(parentStation)
+                .build());
     }
 }
