@@ -2,7 +2,7 @@ package engineeringthesis.controller;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
-import engineeringthesis.model.dto.StationMeasurements;
+import engineeringthesis.model.dto.plot.StationMeasurements;
 import engineeringthesis.model.jpa.enums.PollutionMeasurementType;
 import engineeringthesis.model.jpa.enums.WeatherMeasurementType;
 import engineeringthesis.service.FileImportService;

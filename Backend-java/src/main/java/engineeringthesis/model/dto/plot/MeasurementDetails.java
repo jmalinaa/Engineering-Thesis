@@ -1,4 +1,4 @@
-package engineeringthesis.model.dto;
+package engineeringthesis.model.dto.plot;
 
 import lombok.AllArgsConstructor;
 

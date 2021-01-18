@@ -14,7 +14,12 @@ public interface StationRepository extends JpaRepository<Station, Long> {
 
     List<Station> findAll();
 
-    Optional<Station> findById(@Param("id")Long id);
+    Optional<Station> findById(@Param("id") Long id);
+
+    @Query(value = "SELECT * FROM station s WHERE s.latitude = :latitude AND s.longitude = :longitude AND s.name = :name AND s.parent_id = :parentId", nativeQuery = true)
+    Optional<Station> findByValues(@Param("latitude") Double latitude, @Param("longitude") Double longitude,
+                                   @Param("name") String name, @Param("parentId") Long parentId);
+
 
 }
 

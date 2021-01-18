@@ -1,8 +1,8 @@
 package engineeringthesis.service;
 
-import engineeringthesis.model.dto.StationMeasurements;
+import engineeringthesis.model.dto.plot.StationMeasurements;
 import engineeringthesis.model.jpa.Measurement;
-import engineeringthesis.repository.MeasurementRepository;
+import engineeringthesis.repository.measurement.MeasurementRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +27,13 @@ public class MeasurementService {
     }
 
     public List<StationMeasurements> getMeasurementByStationId(long stationId) {
+        List<StationMeasurements> stationMeasurements = new ArrayList<>();
+        stationMeasurements.addAll(pollutionService.getAllMeasurementsForStation(stationId));
+        stationMeasurements.addAll(weatherService.getAllMeasurementsForStation(stationId));
+        return stationMeasurements;
+    }
+
+    public List<StationMeasurements> getMeasurementsToCalibrationByStationId(long stationId) {
         List<StationMeasurements> stationMeasurements = new ArrayList<>();
         stationMeasurements.addAll(pollutionService.getAllMeasurementsForStation(stationId));
         stationMeasurements.addAll(weatherService.getAllMeasurementsForStation(stationId));

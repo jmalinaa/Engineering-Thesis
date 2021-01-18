@@ -1,7 +1,7 @@
 package engineeringthesis.service;
 
-import engineeringthesis.model.dto.MeasurementDetails;
-import engineeringthesis.model.dto.StationMeasurements;
+import engineeringthesis.model.dto.plot.MeasurementDetails;
+import engineeringthesis.model.dto.plot.StationMeasurements;
 import engineeringthesis.model.jpa.Pollution;
 import engineeringthesis.model.jpa.enums.PollutionMeasurementType;
 import engineeringthesis.repository.PollutionRepository;
@@ -43,7 +43,7 @@ public class PollutionService {
 
     private List<MeasurementDetails> getMeasurementsByStationIdAndMeasurementType(long stationId, PollutionMeasurementType measurementType) {
         return em.createQuery(
-                "SELECT new engineeringthesis.model.dto.MeasurementDetails(m.time, p.measurementValue) FROM pollution p JOIN p.measurement m WHERE m.station.id = :stationId AND p.measurementType = :measurementType",
+                "SELECT new engineeringthesis.model.dto.plot.MeasurementDetails(m.time, p.measurementValue) FROM pollution p JOIN p.measurement m WHERE m.station.id = :stationId AND p.measurementType = :measurementType",
                 MeasurementDetails.class)
                 .setParameter("stationId", stationId)
                 .setParameter("measurementType", measurementType)

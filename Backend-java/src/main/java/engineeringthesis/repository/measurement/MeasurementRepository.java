@@ -1,4 +1,4 @@
-package engineeringthesis.repository;
+package engineeringthesis.repository.measurement;
 
 import engineeringthesis.model.jpa.Measurement;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,7 +9,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
-public interface MeasurementRepository extends JpaRepository<Measurement, Long> {
+public interface MeasurementRepository extends JpaRepository<Measurement, Long>, MeasurementRepositoryCustom {
 
     List<Measurement> findAll();
 
@@ -17,4 +17,8 @@ public interface MeasurementRepository extends JpaRepository<Measurement, Long> 
 
     @Query(value = "SELECT * FROM measurement m WHERE m.station_id = :stationId AND m.time_utc = :time", nativeQuery = true)
     Optional<Measurement> findByValues(@Param("stationId") long stationId, @Param("time") Date time);
+
+    @Query(value = "SELECT * FROM measurement m WHERE m.station_id = :stationId", nativeQuery = true)
+    List<Measurement> findByStationId(@Param("stationId") long stationId);
+
 }
