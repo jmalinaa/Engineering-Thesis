@@ -35,17 +35,12 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <optional>true</optional>
+            <version>1.18.8</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>org.hibernate</groupId>
-            <artifactId>hibernate-jpamodelgen</artifactId>
-            <version>5.2.17.Final</version>
         </dependency>
 
         <dependency>
@@ -68,49 +63,53 @@
             <artifactId>opencsv</artifactId>
             <version>2.3</version>
         </dependency>
-
         <dependency>
             <groupId>com.github.jbytecode</groupId>
             <artifactId>RCaller</artifactId>
             <version>3.0</version>
         </dependency>
-
         <dependency>
-            <groupId>org.renjin</groupId>
-            <artifactId>renjin-script-engine</artifactId>
-            <version>3.5-beta76</version>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>1.4.1.Final</version>
         </dependency>
         <dependency>
-            <groupId>org.renjin.cran</groupId>
-            <artifactId>vars</artifactId>
-            <version>1.5-2-b240</version>
-        </dependency>
-        <dependency>
-            <groupId>org.renjin.cran</groupId>
-            <artifactId>tseries</artifactId>
-            <version>0.10-34-b220</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.joestelmach</groupId>
-            <artifactId>natty</artifactId>
-            <version>0.13</version>
+        <groupId>com.joestelmach</groupId>
+        <artifactId>natty</artifactId>
+        <version>0.13</version>
         </dependency>
     </dependencies>
-
-    <repositories>
-        <repository>
-            <id>bedatadriven</id>
-            <name>bedatadriven public repo</name>
-            <url>https://nexus.bedatadriven.com/content/groups/public/</url>
-        </repository>
-    </repositories>
 
     <build>
         <plugins>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.8.1</version>
+                <configuration>
+                    <release>11</release>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>1.4.1.Final</version>
+                        </path>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>1.18.8</version>
+                        </path>
+                            <annotationProcessorPath>
+                                <groupId>org.hibernate</groupId>
+                                <artifactId>hibernate-jpamodelgen</artifactId>
+                                <version>LATEST</version>
+                            </annotationProcessorPath>
+                    </annotationProcessorPaths>
+                </configuration>
             </plugin>
         </plugins>
     </build>
