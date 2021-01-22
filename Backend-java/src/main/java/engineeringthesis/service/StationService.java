@@ -26,8 +26,18 @@ public class StationService {
         return stationRepository.findById(id);
     }
 
+    public Optional<StationDTO> getStationDtoById(Long id) {
+        Optional<Station> station = getStationById(id);
+        if (station.isPresent()) {
+            return Optional.of(StationMapper.INSTANCE.toDTO(station.get()));
+        } else {
+            return Optional.empty();
+        }
+    }
+
     public Station addStation(Station newStation) {
-        Optional<Station> sameExisting = stationRepository.findByValues(newStation.getLatitude(), newStation.getLongitude(), newStation.getName(), newStation.getParentStation().getId());
+        Optional<Station> sameExisting = stationRepository.findByValues(newStation.getLatitude(), newStation.getLongitude(),
+                newStation.getName(), newStation.getParentStation() != null ? newStation.getParentStation().getId() : null);
         if (sameExisting.isPresent()) {
             return sameExisting.get();
         } else {
