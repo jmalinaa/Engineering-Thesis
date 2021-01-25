@@ -5,22 +5,29 @@ import engineeringthesis.model.jpa.*;
 import engineeringthesis.repository.AbstractRepository;
 import org.springframework.stereotype.Repository;
 
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Expression;
-import javax.persistence.criteria.Join;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
 import java.sql.Time;
 import java.util.List;
 
 @Repository
 public class MeasurementRepositoryImpl extends AbstractRepository implements MeasurementRepositoryCustom {
 
-    public List<MeasurementsCompare> getTimePairs(long station1Id, long station2Id) {
+    public List<MeasurementsCompare> getTimePairs(long referenceStationId, long stationToCalibrateId) {
         CriteriaQuery<MeasurementsCompare> cq = cb.createQuery(MeasurementsCompare.class);
         Root<Measurement> root1 = cq.from(Measurement.class);
         Root<Measurement> root2 = cq.from(Measurement.class);
-        Join<Measurement, Station> station1 = root1.join(Measurement_.station);
-        Join<Measurement, Station> station2 = root2.join(Measurement_.station);
+        Join<Measurement, Station> referenceStation = root1.join(Measurement_.station);
+        Join<Measurement, Station> stationToCalibrate = root2.join(Measurement_.station);
+
+        //Subquery to check if there is any calibration result for this timestamp
+        Subquery<Long> sub = cq.subquery(Long.class);
+        Root<Measurement> subRoot = sub.from(Measurement.class);
+        Join<Measurement, Station> subStation = subRoot.join(Measurement_.station);
+        Join<Station, Station> subStationParent = subStation.join(Station_.parentStation);
+        sub.select(subRoot.get(Measurement_.id));
+        sub.where(cb.and(
+                cb.equal(root2.get(Measurement_.time), subRoot.get(Measurement_.time)),
+                cb.equal(subStationParent.get(Station_.id), stationToCalibrate.get(Station_.id))));
 
         Expression<Time> timeDiff = cb.function(
                 "TIMEDIFF",
@@ -45,8 +52,9 @@ public class MeasurementRepositoryImpl extends AbstractRepository implements Mea
                 cb.and(
                         cb.lessThanOrEqualTo(timeToSec, 300),
                         cb.greaterThanOrEqualTo(timeToSec, -300),
-                        cb.equal(station1.get(Station_.id), station1Id),
-                        cb.equal(station2.get(Station_.id), station2Id)));
+                        cb.equal(referenceStation.get(Station_.id), referenceStationId),
+                        cb.equal(stationToCalibrate.get(Station_.id), stationToCalibrateId),
+                        cb.not(cb.exists(sub))));
         cq.orderBy();
         return entityManager.createQuery(cq).getResultList();
     }

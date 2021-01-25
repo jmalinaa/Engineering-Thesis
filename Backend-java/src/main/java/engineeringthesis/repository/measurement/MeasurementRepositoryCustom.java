@@ -6,7 +6,7 @@ import java.util.List;
 
 public interface MeasurementRepositoryCustom {
 
-    List<MeasurementsCompare> getTimePairs(long station1Id, long station2Id);
+    List<MeasurementsCompare> getTimePairs(long referenceStationId, long stationToCalibrateId);
 
     List<String> getMeasurementTypesByStationId(long stationId);
 

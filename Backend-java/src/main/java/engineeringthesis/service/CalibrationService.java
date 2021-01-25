@@ -4,6 +4,7 @@ import com.github.rcaller.rstuff.RCaller;
 import com.github.rcaller.rstuff.RCallerOptions;
 import com.github.rcaller.rstuff.RCode;
 import engineeringthesis.model.dto.calibration.*;
+import engineeringthesis.model.exception.TooFewMeasurementsToCalibrate;
 import engineeringthesis.model.jpa.Measurement;
 import engineeringthesis.model.jpa.Pollution;
 import engineeringthesis.model.jpa.Station;
@@ -41,12 +42,13 @@ public class CalibrationService {
     private List<String> stationToCalibrateMeasurementTypes;
     private List<MeasurementsCompare> measurements;
 
-    public CalibrationResult getCalibration(long referenceStationId, long stationToCalibrateId) {
+    public CalibrationResult getCalibration(long referenceStationId, long stationToCalibrateId) throws TooFewMeasurementsToCalibrate {
         referenceStationMeasurementTypes = measurementRepository.getMeasurementTypesByStationId(referenceStationId);
         stationToCalibrateMeasurementTypes = measurementRepository.getMeasurementTypesByStationId(stationToCalibrateId);
         result.setSameMeasurementTypes(prepareMapOfSameMeasurementTypes());
 
         measurements = measurementRepository.getTimePairs(referenceStationId, stationToCalibrateId);
+        checkNumberOfMeasurements();
 
         referenceStationData = new double[referenceStationMeasurementTypes.size()][measurements.size()];
         stationToCalibrateData = new double[stationToCalibrateMeasurementTypes.size()][measurements.size()];
@@ -64,6 +66,12 @@ public class CalibrationService {
         }
 
         return result;
+    }
+
+    private void checkNumberOfMeasurements() throws TooFewMeasurementsToCalibrate {
+        if (measurements.size() < 12) {
+            throw new TooFewMeasurementsToCalibrate();
+        }
     }
 
     private void fetchMeasurementsData() {
