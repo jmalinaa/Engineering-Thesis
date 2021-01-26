@@ -25,7 +25,7 @@ export default function GET(path, onSuccess, onError) {
     function checkStatus(response) {
         if (!response.ok) {
             errorOccurred = true;
-            onError('GET, Wystąpił błąd. Status odpowiedzi: ' + response.status);
+            onError('GET, Wystąpił błąd. Status odpowiedzi: ' + response.status, response);
             return null;
         }
         return response;

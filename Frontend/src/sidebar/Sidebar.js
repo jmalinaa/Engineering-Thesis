@@ -40,16 +40,6 @@ function Sidebar(props) {
                         </IconButton>
                     </div>
                     <List>
-                        {/* <Link to={"/stations"}>
-                        <ListItem button key={"Stations"}>
-                            <ListItemText primary="Stations" />
-                        </ListItem>
-                    </Link> */}
-                        <ListItem button key={"MainPage"} onClick={props.handleDrawerClose}>
-                            <Link to={"/"}>
-                                <ListItemText primary="Strona główna" />
-                            </Link>
-                        </ListItem>
                         <ListItem button key={"Stations"} onClick={props.handleDrawerClose}>
                             <Link to={"/stations"}>
                                 <ListItemText primary="Stacje" />

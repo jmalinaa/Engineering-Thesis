@@ -15,7 +15,6 @@ import { ALL_STATIONS_PATH, ADD_STATION_PATH } from "../util/REST/paths";
 import GET from "../util/REST/GET";
 import { makeStyles } from '@material-ui/core/styles';
 import POST from "../util/REST/POST";
-import { Redirect } from 'react-router-dom';
 
 function Stations({ location, props }) {
 
@@ -27,8 +26,6 @@ function Stations({ location, props }) {
     const [confirmationDialogOpen, setConfirmationDialogOpen] = React.useState(false);
     const [confirmationMessage, setConfirmationMessage] = React.useState('');
     const [confirmationSeverity, setConfirmationSeverity] = React.useState(null);
-    const [triggerRedirectionToStation, setTriggerRedirectionToStation] = React.useState(false);
-    const [triggerRedirectionToComparison, setTriggerRedirectionToComparison] = React.useState(false);
     const [refreshValue, setRefreshValue] = React.useState(0);
 
     function refresh() {
@@ -74,6 +71,8 @@ function Stations({ location, props }) {
         { selector: 'latitude', name: 'Szerokość geogr.' },
         { selector: 'longitude', name: 'Długość geogr.' },
         { selector: 'name', name: 'Nazwa stacji' },
+        { selector: 'parentId', name: 'Stacja- źródło kalibracji' },
+        { selector: 'childId', name: 'Stacja- wynik kalibracji' },
     ];
 
     function onAddStationSuccess(json) {
@@ -136,20 +135,11 @@ function Stations({ location, props }) {
     //TODO extract paths to separate file!
 
     function redirectToStation() {
-        console.log("Stations, redirectToStation, selectedRows: ", selectedRows);
-        if (triggerRedirectionToStation)
-            return (<Redirect
-                to={`/station/${selectedRows[0].id}`} //assuming there is exactly one selected row!
-            />)
-        return null;
+        window.location = `/station/${selectedRows[0].id}`;
     }
 
     function redirectToComparison() {
-        console.log("Stations, redirectToComparison, selectedRows: ", selectedRows);
-        if (triggerRedirectionToComparison)
-            return (<Redirect        
-                to={`/stations/comparison/${selectedRows[0].id}/${selectedRows[1].id}`} //assuming there are exactly two selected rows!
-            />)
+        window.location = `/stations/comparison/${selectedRows[0].id}/${selectedRows[1].id}`;
     }
 
     const actions = [
@@ -163,16 +153,14 @@ function Stations({ location, props }) {
     const contextActions = [
         <Tooltip title="Przejdź do stacji" id={'redirectTooltip'} key={'context-action-0'}>
             <span>
-                <IconButton onClick={() => setTriggerRedirectionToStation(true)} disabled={selectedRowsCount !== 1} >
-                    {redirectToStation()}
+                <IconButton onClick={() => redirectToStation()} disabled={selectedRowsCount !== 1} >
                     <SubdirectoryArrowRightIcon />
                 </IconButton>
             </span>
         </Tooltip>,
         <Tooltip title="Porównaj dane pomiarowe na wykresie" id={'comparisonTooltip'} key={'context-action-1'}>
             <span>
-                <IconButton onClick={() => setTriggerRedirectionToComparison(true)} disabled={selectedRowsCount !== 2} >
-                    {redirectToComparison()}
+                <IconButton onClick={() => redirectToComparison()} disabled={selectedRowsCount !== 2} >
                     <CompareIcon />
                 </IconButton>
             </span>
