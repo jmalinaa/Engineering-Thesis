@@ -8,14 +8,14 @@ import {
     STATION_PATH,
     COLUMN_NAMES_PATH,
     ALL_MEASUREMENTS_PATH,
-    // CALIBRATION_PATH,
+    CALIBRATION_PATH,
 } from "../../util/REST/paths";
 import GET from "../../util/REST/GET";
 import { TimeRange } from "pondjs";
 import makeStyles from './styles';
 import useField from "../../../materialUiWrappers/useField";
 import DefaultSelectField from "../../../materialUiWrappers/DefaultSelectField";
-import CalibrationResults from "./calibrationResults/CalibrationResults";
+import CorrelationTable from "./calibrationResults/CalibrationResults";
 
 export default function StationsComparison({ ...props }) {
     console.log("StationComparison, props:", props);
@@ -31,8 +31,10 @@ export default function StationsComparison({ ...props }) {
     const [timeRangeUserChose, setTimeRangeUserChose] = React.useState(null);
     const [timeRangeDefault, setTimeRangeDefault] = React.useState(null);
     const [alertMsg, setAlertMsg] = React.useState(null);
-    const [calibration, setCalibration] = React.useState(null);
-    const referencialStationField = useField(station1Id);
+    const [correlation, setCorrelation] = React.useState(null);
+    const [meanAndMaxDiffMap, setMeanAndMaxDiffMap] = React.useState(null);
+    const [sameMeasurementTypes, setSameMeasurementTypes] = React.useState(null);
+    const referencialStationField = useField('');
 
     function onTimePeriodManualChange(newTimePeriod) {
         console.log("StationComparison, onTimePeriodManualChange, newTimePeriod:", newTimePeriod);
@@ -50,7 +52,7 @@ export default function StationsComparison({ ...props }) {
             setter(json);
         }
         function onGetError(error, stationId, setter) {
-            console.log("Station, fetch data error: ", error);
+            console.log("StationsComparison, fetch data error: ", error);
             let msg = "Nie udało się pobrać danych stacji ";
             if (error.message != null)
                 setAlertMsg(msg + stationId + ". Treść błędu: " + error.message);
@@ -84,7 +86,7 @@ export default function StationsComparison({ ...props }) {
         function onColumnsSuccess(json) {
             console.log("StationComparison, fetch columns SUCCESS, json: ", json);
             if (json != null) {
-                setMeasurementTypes(json.filter(measurementType => measurementType != 'TIME' && measurementType != 'time'));
+                setMeasurementTypes(json.filter(measurementType => measurementType.toUpperCase() !== 'TIME'));
                 // setAlertMsg(null);
             }
             else {
@@ -104,51 +106,50 @@ export default function StationsComparison({ ...props }) {
     }, []
     );
 
-    React.useEffect(() => {
-        //TODO UNCOMMENT when endpoint is finished
-        // function onCalibrationSuccess(json) {
-        //     console.log("StationComparison, fetch calibration SUCCESS, json: ", json);
-        //     if (json != null) {
-        //         setCalibration(json);
-        //         // setAlertMsg(null);
-        //     }
-        //     else {
-        //         setCalibration(null);
-        //         setAlertMsg("Nie znaleziono nazw kolumn!");
-        //     }
-        // }
-        // function onCalibrationError(error) {
-        //     console.log("StationComparison, fetch calibration error: ", error);
-        //     if (error.message != null)
-        //         setAlertMsg(error.message);
-        //     else
-        //         setAlertMsg(error.toString());
-        //     setCalibration(null);
-        // }
-        // GET(CALIBRATION_PATH, onCalibrationSuccess, onCalibrationError);
-        //TODO MOCK STARTS HERE
-        const calibrationMock = {
-            columnNames: ['temp', 'humi', 'pm1', 'pm25', 'pm10'],
-            rowNames: ['temp', 'humi', 'pm1', 'pm25', 'pm10'],
-            values: [
-                ['X', -0.83, -0.31, -0.33, -0.34],
-                [-0.83, 'X', -0.47, -0.49, -0.50],
-                [-0.31, 0.47, 'X', -0.998, -0.996],
-                [-0.33, 0.49, -0.998, 'X', -0.999],
-                [-0.34, 0.50, -0.996, -0.999, 'X']
-            ]
-        }
-        // TODO MOCK ENDS HERE
+    function buildCorrelationTable(correlationResults) {
         const rows = [];
-        calibrationMock.values.forEach((valuesList, index) => {
-            const row = [calibrationMock.rowNames[index]].concat(valuesList);    //add row name at the beginning of the row
+        correlationResults.correlationValues.forEach((valuesList, index) => {
+            const row = [correlationResults.rowNames[index]].concat(valuesList);    //add row name at the beginning of the row
             rows.push(row);
         })
-        calibrationMock.values = rows;
-        calibrationMock.columnNames = ['agh'].concat(calibrationMock.columnNames);
+        correlationResults.values = rows;
+        correlationResults.columnNames = ['agh'].concat(correlationResults.columnNames);
+    }
 
-        setCalibration(calibrationMock);
-    }, [station1Id, station2Id]
+    React.useEffect(() => {
+        function onCalibrationSuccess(json) {
+            console.log("StationComparison, fetch calibration SUCCESS, json: ", json);
+            if (json != null) {
+                buildCorrelationTable(json.correlationResult);
+                setCorrelation(json.correlationResult);
+                setMeanAndMaxDiffMap(json.meanAndMaxDiffMap);
+                setSameMeasurementTypes(json.sameMeasurementTypes);
+                // setAlertMsg(null);
+            }
+            else {
+                setCorrelation(null);
+                setAlertMsg("Nie znaleziono nazw kolumn!");
+            }
+        }
+        function onCalibrationError(error, response) {
+            console.log("StationComparison, fetch calibration error: ", error);
+            if (response.status === 400)
+                setAlertMsg(`Stacje ${station1Id} ${station1NameInBracket} i ${station2Id} ${station2NameInBracket}: za mało pomiarów dla przeprowadzenia kalibracji!`);
+            else if (error.message != null)
+                setAlertMsg(error.message);
+            else
+                setAlertMsg(error.toString());
+            setCorrelation(null);
+        }
+
+        if (referencialStationField.get.value == '')
+            return;
+
+        const referencialStationId = referencialStationField.get.value;
+        const calibratedStationId = station1Id === referencialStationId ? station2Id : station1Id;
+        const path = CALIBRATION_PATH.replace('{refStation}', referencialStationId) + calibratedStationId;
+        GET(path, onCalibrationSuccess, onCalibrationError);
+    }, [station1Id, station2Id, referencialStationField.get.value]
     );
 
     function pickTimerange() {
@@ -178,6 +179,7 @@ export default function StationsComparison({ ...props }) {
     //TODO dodać dane stacji pod tekstem 'Porównanie stacji o identyfikatorach...'
     //TODO dodać więcej typów wykresów, np słupkowy https://software.es.net/react-timeseries-charts/#/example/barchart
 
+    console.log("StationsComparison, sameMeasurementTypes: ", sameMeasurementTypes);
     return (
         <div className={styles.root}>
             {alertMsg != null &&
@@ -189,7 +191,7 @@ export default function StationsComparison({ ...props }) {
                         <h2>Porównanie stacji o identyfikatorach {station1Id} {station1NameInBracket} i {station2Id} {station2NameInBracket}:</h2>
                         <DefaultSelectField
                             field={referencialStationField}
-                            selectableValues={[station1Id, station2Id]}
+                            selectableValues={['', station1Id, station2Id]}
                             label="Stacja referencyjna"
                         />
                     </Grid>
@@ -205,13 +207,24 @@ export default function StationsComparison({ ...props }) {
                             pickedTimeRange={pickedTimeRange}
                         />
                     </Grid>
-                    {calibration != null &&
+                    {correlation != null &&
                         <Grid item xs={6}>
-                            <CalibrationResults
-                                calibration={calibration}
+                            <CorrelationTable
+                                correlation={correlation}
                             />
                         </Grid>
                     }
+                    <Grid item xs={6} container direction='column'>
+                        {meanAndMaxDiffMap != null &&
+                            <Grid item xs={12} container direction='column'>
+                                {Object.keys(meanAndMaxDiffMap).map((measurementType, index) => {
+                                    const meanDiff = meanAndMaxDiffMap[measurementType].meanDiff;
+                                    const maxDiff = meanAndMaxDiffMap[measurementType].maxDiff;
+                                    return <b key={index}>{measurementType}: średnia różnica: {meanDiff}, maksymalna różnica: {maxDiff} </b>
+                                })}
+                            </Grid>
+                        }
+                    </Grid>
                 </Grid>
             }
         </div>

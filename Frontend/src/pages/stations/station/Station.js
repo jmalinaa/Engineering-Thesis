@@ -18,6 +18,7 @@ export default function Station(props) {
     console.log("Station, props:", props);
     const stationId = props.match.params.id;
     const [stationData, setStationData] = React.useState(null);
+    const [isCalibrable, setCalibrable] = React.useState(null); //indicates if it's possible to import new data
     const [acceptableColumns, setAcceptableColumns] = React.useState(null); //TODO może możliwość ignorowania kolumn?
     const [measurements, setMeasurements] = React.useState([]);
     const [uploadedFile, setUploadedFile] = React.useState(null);
@@ -30,10 +31,12 @@ export default function Station(props) {
             console.log("Station, fetchData SUCCESS, json: ", json);
             if (json != null) {
                 setStationData(json);
+                setCalibrable(json.parentId == null);
                 setAlertMsg(null);
             }
             else {
                 setStationData(null);
+                setCalibrable(null);
                 setAlertMsg("Nie znaleziono danych stacji o id: " + stationId);
             }
         }
@@ -98,7 +101,6 @@ export default function Station(props) {
         }
         if (fileName.endsWith('.xls') || fileName.endsWith('.xlsx')) {
             console.log("Station, handleUpload, it's an Excel file");
-            // readXlsxFile(file).then(setMeasurements);
             readXlsxFile(file).then(rows => {
                 console.log("Station, handleUpload, rows: ", rows);
                 setMeasurements(rows);
@@ -108,7 +110,7 @@ export default function Station(props) {
 
     function handleFileLoadError(error) {
         console.log("Station, handleFileLoadError, error:", error);
-        setAlertMsg(error);
+        setAlertMsg(error.toString());
     }
 
 
@@ -160,13 +162,15 @@ export default function Station(props) {
                     <h2>Szerokość geograficzna: {stationData.latitude}</h2>
                     <h2>Długość geograficzna: {stationData.longitude}</h2>
                     <h2>Unikalny identyfikator stacji: {stationData.id}</h2>
-                    <ReactFileReader
-                        handleFiles={handleUpload}
-                        multipleFiles={false}
-                        fileTypes={'.xlsx,.xls,.csv'}
-                    >
-                        <button className='btn'>Wczytaj plik z danymi stacji </button>
-                    </ReactFileReader>
+                    {isCalibrable &&
+                        <ReactFileReader
+                            handleFiles={handleUpload}
+                            multipleFiles={false}
+                            fileTypes={'.xlsx,.xls,.csv'}
+                        >
+                            <button className='btn'>Wczytaj plik z danymi stacji </button>
+                        </ReactFileReader>
+                    }
                     {measurements.length > 0 &&
                         acceptableColumns != null &&
                         successMsg == null &&

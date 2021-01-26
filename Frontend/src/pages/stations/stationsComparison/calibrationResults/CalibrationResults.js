@@ -2,17 +2,18 @@ import React from "react";
 
 import DataTable from 'react-data-table-component';
 
-export default function CalibrationResults({ calibration, ...props }) {
+export default function CorrelationTable({ correlation, ...props }) {
 
-    const columnNames = calibration.columnNames;
+    const columnNames = correlation.columnNames;
     const columns = createColumns(columnNames)
-    const rows = calibration.values.map(valuesRow => convertToObject(valuesRow, columnNames));
+    const rows = correlation.values.map(valuesRow => convertToObject(valuesRow, columnNames));
 
-    console.log('CalibrationResults, columns', columns);
-    console.log('CalibrationResults, rows', rows);
+    console.log('CorrelationTable, columns', columns);
+    console.log('CorrelationTable, rows', rows);
 
     return (
         <DataTable
+            title='Wyniki korelacji'
             pagination
             highlightOnHover
             columns={columns}
