@@ -9,6 +9,7 @@ import engineeringthesis.service.FileImportService;
 import engineeringthesis.service.MeasurementService;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -64,7 +65,11 @@ public class MeasurementController {
         columnNames.addAll(PollutionMeasurementType.getListOfNames());
         columnNames.addAll(WeatherMeasurementType.getListOfNames());
         columnNames.add("TIME");
-        return new ResponseEntity<>(gson.toJson(columnNames), HttpStatus.OK);
+
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.set("Content-Type", "text/html; charset=utf-8");
+
+        return new ResponseEntity<>(gson.toJson(columnNames), responseHeaders, HttpStatus.OK);
     }
 
 }

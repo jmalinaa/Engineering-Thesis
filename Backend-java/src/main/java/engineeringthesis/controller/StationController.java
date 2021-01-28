@@ -6,6 +6,7 @@ import engineeringthesis.model.jpa.Station;
 import engineeringthesis.service.StationService;
 import lombok.extern.java.Log;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -25,7 +26,8 @@ public class StationController {
     @GetMapping(path = "/stations")
     public ResponseEntity<String> getStations() {
         log.info("getStations invoked");
-        return new ResponseEntity<>(gson.toJson(stationService.getAllStations()), HttpStatus.OK);
+
+        return new ResponseEntity<>(gson.toJson(stationService.getAllStations()), getHeader(), HttpStatus.OK);
     }
 
     @GetMapping(path = "/stations/{id}")
@@ -33,7 +35,7 @@ public class StationController {
         log.info(String.format("getStation invoked for id: %d", id));
         Optional<StationDTO> station = stationService.getStationDtoById(id);
         if(station.isPresent()) {
-            return new ResponseEntity<>(gson.toJson(station.get()), HttpStatus.OK);
+            return new ResponseEntity<>(gson.toJson(station.get()), getHeader(), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -45,5 +47,11 @@ public class StationController {
         Station newStation = gson.fromJson(station, Station.class);
         stationService.addStation(newStation);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    private HttpHeaders getHeader() {
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.set("Content-Type", "application/json; charset=utf-8");
+        return responseHeaders;
     }
 }

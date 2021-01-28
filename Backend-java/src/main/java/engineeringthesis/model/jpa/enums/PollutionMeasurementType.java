@@ -20,7 +20,7 @@ public enum PollutionMeasurementType {
     public static List<String> getListOfNames() {
         List<String> names = new ArrayList<>();
         for(PollutionMeasurementType pmt : PollutionMeasurementType.values()) {
-            names.add(pmt.name());
+            names.add(pmt.getValue());
         }
         return names;
     }

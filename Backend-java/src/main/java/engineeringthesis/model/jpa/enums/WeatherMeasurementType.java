@@ -21,7 +21,7 @@ public enum WeatherMeasurementType {
     public static List<String> getListOfNames() {
         List<String> names = new ArrayList<>();
         for(WeatherMeasurementType wmt : WeatherMeasurementType.values()) {
-            names.add(wmt.name());
+            names.add(wmt.getValue());
         }
         return names;
     }
