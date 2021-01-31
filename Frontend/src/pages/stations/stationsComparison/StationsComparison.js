@@ -86,7 +86,7 @@ export default function StationsComparison({ ...props }) {
         function onColumnsSuccess(json) {
             console.log("StationComparison, fetch columns SUCCESS, json: ", json);
             if (json != null) {
-                setMeasurementTypes(json.filter(measurementType => measurementType.toUpperCase() !== 'TIME'));
+                setMeasurementTypes(json.filter(measurementType => measurementType.toUpperCase() !== 'CZAS'));
                 // setAlertMsg(null);
             }
             else {
