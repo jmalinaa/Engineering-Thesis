@@ -86,7 +86,7 @@ public class XlsImportService {
                         pollutionService.addPollution(
                                 Pollution.builder()
                                         .measurement(measurement)
-                                        .measurementType(PollutionMeasurementType.valueOf(name))
+                                        .measurementType(PollutionMeasurementType.findByValue(name))
                                         .measurementValue(c.getNumericCellValue())
                                         .build());
                     }

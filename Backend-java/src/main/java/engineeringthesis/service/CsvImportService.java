@@ -78,10 +78,11 @@ public class CsvImportService {
                 (name, columnNo) -> {
                     String value = line[columnNo];
                     if (!value.equalsIgnoreCase("")) {
+
                         pollutionService.addPollution(
                                 Pollution.builder()
                                         .measurement(measurement)
-                                        .measurementType(PollutionMeasurementType.valueOf(name))
+                                        .measurementType(PollutionMeasurementType.findByValue(name))
                                         .measurementValue(Double.valueOf(line[columnNo]))
                                         .build());
                     }

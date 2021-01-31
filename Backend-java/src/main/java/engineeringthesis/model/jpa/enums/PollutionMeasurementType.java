@@ -5,7 +5,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @AllArgsConstructor
@@ -24,4 +26,12 @@ public enum PollutionMeasurementType {
         }
         return names;
     }
+
+    public static PollutionMeasurementType findByValue(String value) {
+        List<PollutionMeasurementType> res = Arrays.stream(PollutionMeasurementType.values())
+                .filter(pmt -> pmt.getValue().equalsIgnoreCase(value))
+                .collect(Collectors.toList());
+        return res.size() > 0 ? res.get(0) : null;
+    }
+
 }
