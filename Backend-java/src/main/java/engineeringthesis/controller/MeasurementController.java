@@ -64,7 +64,7 @@ public class MeasurementController {
         List<String> columnNames = new ArrayList<>();
         columnNames.addAll(PollutionMeasurementType.getListOfNames());
         columnNames.addAll(WeatherMeasurementType.getListOfNames());
-        columnNames.add("TIME");
+        columnNames.add("Czas");
 
         HttpHeaders responseHeaders = new HttpHeaders();
         responseHeaders.set("Content-Type", "text/html; charset=utf-8");

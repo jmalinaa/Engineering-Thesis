@@ -45,7 +45,7 @@ public class FileImportService {
 
     private int getTimeColumnNo(List<String> columnsList) {
         for (int i = 0; i < columnsList.size(); i++) {
-            if (columnsList.get(i).equalsIgnoreCase("TIME")) {
+            if (columnsList.get(i).equalsIgnoreCase("Czas")) {
                 return i;
             }
         }
