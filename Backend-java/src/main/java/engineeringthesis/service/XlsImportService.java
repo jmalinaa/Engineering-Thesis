@@ -6,6 +6,7 @@ import engineeringthesis.model.jpa.Station;
 import engineeringthesis.model.jpa.Weather;
 import engineeringthesis.model.jpa.enums.PollutionMeasurementType;
 import engineeringthesis.model.jpa.enums.WeatherMeasurementType;
+import engineeringthesis.util.DateUtil;
 import lombok.extern.java.Log;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -61,7 +63,7 @@ public class XlsImportService {
                           Map<String, Integer> pollutionColumnsNamesAndNos) {
         Measurement measurement = Measurement.builder()
                 .station(station)
-                .time(row.getCell(timeColumnNo).getDateCellValue())
+                .time(getTimeCellValue(row, timeColumnNo))
                 .build();
 
         measurement.setId(measurementService.addMeasurement(measurement));
@@ -91,5 +93,11 @@ public class XlsImportService {
                                         .build());
                     }
                 });
+    }
+
+    private Date getTimeCellValue(Row row, int timeColumnNo) {
+        DataFormatter dataFormatter = new DataFormatter();
+        String cellStringValue = dataFormatter.formatCellValue(row.getCell(timeColumnNo));
+        return DateUtil.parseDate(cellStringValue);
     }
 }
