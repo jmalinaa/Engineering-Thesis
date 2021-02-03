@@ -3,26 +3,15 @@ import React from "react";
 import Button from '@material-ui/core/Button';
 import DataTable from 'react-data-table-component';
 import FormControl from '@material-ui/core/FormControl';
-import FormHelperText from '@material-ui/core/FormHelperText';
 import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
 import Select from '@material-ui/core/Select';
+import Tooltip from "@material-ui/core/Tooltip";
 
-import { makeStyles } from '@material-ui/core/styles';
+import makeStyles from './styles';
 import PropTypes from 'prop-types';
 
-const useStyles = makeStyles((theme) => ({  //TODO extract this
-    formControl: {
-        margin: theme.spacing(1),
-        minWidth: 120,
-    },
-    selectEmpty: {
-        marginTop: theme.spacing(2),
-    },
-}));
-
 export default function DataImport({ data, acceptableColumns, handleSubmit, ...props }) {
-    const classes = useStyles();
+    const classes = makeStyles();
     const [refershValue, setRefreshValue] = React.useState(0);
 
     function refresh() {
@@ -44,6 +33,30 @@ export default function DataImport({ data, acceptableColumns, handleSubmit, ...p
         refresh();
     }
 
+    function countNonEmpty(array) {
+        let counter = 0;
+        for (let element of array)
+            if (element !== '')
+                counter++;
+        return counter;
+    }
+
+    function noDuplicates(array) {
+        for (let i = 0; i < array.length; i++)
+            for (let j = i + 1; j < array.length; j++)
+                if (array[i] === array[j])
+                    return false;
+        return true;
+    }
+
+    function mappingsValid() {
+        if (!columnMappings.includes('Czas'))
+            return false;
+        if (countNonEmpty(columnMappings) < 2)
+            return false;
+        return true;
+    }
+
     function createSelectFields(data) {
         const fileColumns = [];
         data[0]
@@ -51,21 +64,18 @@ export default function DataImport({ data, acceptableColumns, handleSubmit, ...p
                 fileColumns.push(
                     {
                         name:
-                            <FormControl className={classes.formControl} error={columnMappings[index] === ''}>
-                                <InputLabel id="demo-simple-select-label" > {columnNameInFile}</InputLabel >
+                            <FormControl className={classes.formControl}>
+                                <InputLabel> {columnNameInFile}</InputLabel >
                                 <Select
-                                    labelId="demo-simple-select-label"
-                                    id="demo-simple-select"
+                                    native
                                     value={columnMappings[index]}
                                     onChange={event => onChange(event, index)}
                                 >
+                                    <option value="" />
                                     {acceptableColumns.map((column, index) =>
-                                        <MenuItem value={column} key={index}>{column}</MenuItem>
+                                        <option value={column} key={index}>{column}</option>
                                     )}
                                 </Select>
-                                {columnMappings[index] === '' &&
-                                    <FormHelperText>Wypełnij pole</FormHelperText>
-                                }
                             </FormControl>,
                         selector: row => row[index] //ATTENTION! This is quite hack-ish, causes warning which can be ignored
                     })
@@ -81,13 +91,20 @@ export default function DataImport({ data, acceptableColumns, handleSubmit, ...p
                 columns={createSelectFields(data)}
                 data={data}
             />
-            <Button
-                disabled={columnMappings.includes('')}
-                onClick={() => handleSubmit(columnMappings, data)}
-                color="primary"
+            <Tooltip
+                title={mappingsValid() ? '' : "Co najmniej dwie kolumny muszą być nieignorowane, z czego jedną musi być czas!"}
+                enterDelay={0}
             >
-                Zatwierdź
-            </Button>
+                <Button
+                    disabled={!mappingsValid()}
+                    onClick={!mappingsValid() ? undefined : () => handleSubmit(columnMappings, data)}
+                    color="primary"
+                    component={!mappingsValid() ? "div" : undefined}
+                    className={classes.button}
+                >
+                    Zatwierdź
+                </Button>
+            </Tooltip>
         </div>
 
 
