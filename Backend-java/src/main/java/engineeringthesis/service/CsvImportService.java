@@ -68,7 +68,7 @@ public class CsvImportService {
                         weatherService.addWeather(
                                 Weather.builder()
                                         .measurement(measurement)
-                                        .measurementType(WeatherMeasurementType.valueOf(name))
+                                        .measurementType(WeatherMeasurementType.findByValue(name))
                                         .measurementValue(Double.valueOf(value))
                                         .build());
                     }
@@ -78,7 +78,6 @@ public class CsvImportService {
                 (name, columnNo) -> {
                     String value = line[columnNo];
                     if (!value.equalsIgnoreCase("")) {
-
                         pollutionService.addPollution(
                                 Pollution.builder()
                                         .measurement(measurement)

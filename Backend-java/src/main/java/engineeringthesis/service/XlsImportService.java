@@ -70,26 +70,25 @@ public class XlsImportService {
 
         weatherColumnsNamesAndNos.forEach(
                 (name, columnNo) -> {
-                    Cell c = row.getCell(columnNo);
-                    if (c != null && c.getCellType() == CellType.NUMERIC) {
-                        weatherService.addWeather(
-                                Weather.builder()
-                                        .measurement(measurement)
-                                        .measurementType(WeatherMeasurementType.valueOf(name))
-                                        .measurementValue(c.getNumericCellValue())
-                                        .build());
+                    Double val = getDoubleCellValue(row, columnNo);
+                    if (val != null) {
+                        weatherService.addWeather(Weather.builder()
+                                .measurement(measurement)
+                                .measurementType(WeatherMeasurementType.findByValue(name))
+                                .measurementValue(val)
+                                .build());
                     }
                 });
 
         pollutionColumnsNamesAndNos.forEach(
                 (name, columnNo) -> {
-                    Cell c = row.getCell(columnNo);
-                    if (c != null && c.getCellType() == CellType.NUMERIC) {
+                    Double val = getDoubleCellValue(row, columnNo);
+                    if (val != null) {
                         pollutionService.addPollution(
                                 Pollution.builder()
                                         .measurement(measurement)
                                         .measurementType(PollutionMeasurementType.findByValue(name))
-                                        .measurementValue(c.getNumericCellValue())
+                                        .measurementValue(val)
                                         .build());
                     }
                 });
@@ -99,5 +98,19 @@ public class XlsImportService {
         DataFormatter dataFormatter = new DataFormatter();
         String cellStringValue = dataFormatter.formatCellValue(row.getCell(timeColumnNo));
         return DateUtil.parseDate(cellStringValue);
+    }
+
+    private Double getDoubleCellValue(Row row, int columnNo) {
+        Cell c = row.getCell(columnNo);
+        if (c != null) {
+            if (c.getCellType() == CellType.NUMERIC) {
+                return c.getNumericCellValue();
+            } else if (c.getCellType() == CellType.STRING) {
+                return Double.valueOf(c.getStringCellValue());
+            } else {
+                log.info(c.getCellType().name());
+            }
+        }
+        return null;
     }
 }
