@@ -1,6 +1,7 @@
 import React from "react";
 
 import Alert from '@material-ui/lab/Alert';
+import Button from "@material-ui/core/Button";
 import Chart from './chart';
 import Grid from '@material-ui/core/Grid';
 
@@ -16,6 +17,7 @@ import makeStyles from './styles';
 import useField from "../../../materialUiWrappers/useField";
 import DefaultSelectField from "../../../materialUiWrappers/DefaultSelectField";
 import CorrelationTable from "./calibrationResults/CalibrationResults";
+
 
 export default function StationsComparison({ ...props }) {
     console.log("StationComparison, props:", props);
@@ -116,7 +118,7 @@ export default function StationsComparison({ ...props }) {
         correlationResults.columnNames = ['agh'].concat(correlationResults.columnNames);
     }
 
-    React.useEffect(() => {
+    function runCorrelation() {
         function onCalibrationSuccess(json) {
             console.log("StationComparison, fetch calibration SUCCESS, json: ", json);
             if (json != null) {
@@ -142,15 +144,11 @@ export default function StationsComparison({ ...props }) {
             setCorrelation(null);
         }
 
-        if (referencialStationField.get.value == '')
-            return;
-
         const referencialStationId = referencialStationField.get.value;
         const calibratedStationId = station1Id === referencialStationId ? station2Id : station1Id;
         const path = CALIBRATION_PATH.replace('{refStation}', referencialStationId) + calibratedStationId;
         GET(path, onCalibrationSuccess, onCalibrationError);
-    }, [station1Id, station2Id, referencialStationField.get.value]
-    );
+    };
 
     function pickTimerange() {
         if (timeRangeUserChose != null)
@@ -189,11 +187,7 @@ export default function StationsComparison({ ...props }) {
                 <Grid container direction='row' spacing={2} >
                     <Grid item xs={12}>
                         <h2>Porównanie stacji o identyfikatorach {station1Id} {station1NameInBracket} i {station2Id} {station2NameInBracket}:</h2>
-                        <DefaultSelectField
-                            field={referencialStationField}
-                            selectableValues={['', station1Id, station2Id]}
-                            label="Stacja referencyjna"
-                        />
+
                     </Grid>
                     <Grid item xs={12}>
                         <Chart
@@ -206,6 +200,20 @@ export default function StationsComparison({ ...props }) {
                             onTimePeriodManualChange={onTimePeriodManualChange}
                             pickedTimeRange={pickedTimeRange}
                         />
+                    </Grid>
+                    <Grid item xs={12} container direction='row' spacing={2}>
+                        <Grid item>
+                            <DefaultSelectField
+                                field={referencialStationField}
+                                selectableValues={[station1Id, station2Id]}
+                                label="Stacja referencyjna"
+                            />
+                        </Grid>
+                        <Grid item>
+                            <Button variant='contained' onClick={runCorrelation} disabled={isBlankString(referencialStationField.get.value)}>
+                                {isBlankString(referencialStationField.get.value) ? "Wybierz stację referencyjną aby przeprowadzić kalibrację" : "Przeprowadź korelację"}
+                            </Button>
+                        </Grid>
                     </Grid>
                     {correlation != null &&
                         <Grid item xs={6}>
@@ -239,4 +247,8 @@ function timeRangesDiffer(tr1, tr2) {
     if (end1 !== tr2.end().valueOf())
         return true;
     return false;
+}
+
+function isBlankString(string) {
+    return string == null || string == '';
 }
