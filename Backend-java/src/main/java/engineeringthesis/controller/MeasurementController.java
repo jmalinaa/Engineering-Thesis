@@ -42,7 +42,7 @@ public class MeasurementController {
         log.info(String.format("getMeasurements invoked for id: %d", id));
         List<StationMeasurements> stationMeasurements = measurementService.getMeasurementByStationId(id);
         if (!stationMeasurements.isEmpty()) {
-            return new ResponseEntity<>(gson.toJson(stationMeasurements), HttpStatus.OK);
+            return new ResponseEntity<>(gson.toJson(stationMeasurements), getHeader(), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -66,10 +66,12 @@ public class MeasurementController {
         columnNames.addAll(WeatherMeasurementType.getListOfNames());
         columnNames.add("Czas");
 
-        HttpHeaders responseHeaders = new HttpHeaders();
-        responseHeaders.set("Content-Type", "text/html; charset=utf-8");
-
-        return new ResponseEntity<>(gson.toJson(columnNames), responseHeaders, HttpStatus.OK);
+        return new ResponseEntity<>(gson.toJson(columnNames), getHeader(), HttpStatus.OK);
     }
 
+    private HttpHeaders getHeader() {
+        HttpHeaders responseHeaders = new HttpHeaders();
+        responseHeaders.set("Content-Type", "application/json; charset=utf-8");
+        return responseHeaders;
+    }
 }

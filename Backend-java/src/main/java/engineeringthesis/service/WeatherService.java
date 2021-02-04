@@ -34,7 +34,7 @@ public class WeatherService {
         for (WeatherMeasurementType weatherType : WeatherMeasurementType.values()) {
             List<MeasurementDetails> md = getMeasurementsByStationIdAndMeasurementType(stationId, weatherType);
             if (!md.isEmpty()) {
-                StationMeasurements newStationMeasurement = new StationMeasurements(weatherType.name(), md);
+                StationMeasurements newStationMeasurement = new StationMeasurements(weatherType.getValue(), md);
                 stationMeasurements.add(newStationMeasurement);
             }
         }

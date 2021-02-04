@@ -34,7 +34,7 @@ public class PollutionService {
         for (PollutionMeasurementType pollutionType : PollutionMeasurementType.values()) {
             List<MeasurementDetails> md = getMeasurementsByStationIdAndMeasurementType(stationId, pollutionType);
             if (!md.isEmpty()) {
-                StationMeasurements newStationMeasurement = new StationMeasurements(pollutionType.name(), md);
+                StationMeasurements newStationMeasurement = new StationMeasurements(pollutionType.getValue(), md);
                 stationMeasurements.add(newStationMeasurement);
             }
         }

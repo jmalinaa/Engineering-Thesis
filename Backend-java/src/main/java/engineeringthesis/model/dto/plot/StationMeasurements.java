@@ -6,6 +6,6 @@ import java.util.List;
 
 @AllArgsConstructor
 public class StationMeasurements {
-    private String measurementType;
-    private List<MeasurementDetails> measurements;
+    private final String measurementType;
+    private final List<MeasurementDetails> measurements;
 }

@@ -33,13 +33,6 @@ public class MeasurementService {
         return stationMeasurements;
     }
 
-    public List<StationMeasurements> getMeasurementsToCalibrationByStationId(long stationId) {
-        List<StationMeasurements> stationMeasurements = new ArrayList<>();
-        stationMeasurements.addAll(pollutionService.getAllMeasurementsForStation(stationId));
-        stationMeasurements.addAll(weatherService.getAllMeasurementsForStation(stationId));
-        return stationMeasurements;
-    }
-
     public long addMeasurement(Measurement newMeasurement) {
         Optional<Measurement> sameExisting = measurementRepository.findByValues(newMeasurement.getStation().getId(), newMeasurement.getTime());
         if (sameExisting.isPresent()) {
