@@ -24,7 +24,7 @@ export default function MeasurementDataDisplay({ stationId, ...props }) {
         json.forEach(measurements => {
             const newColumn = {
                 name: measurements.measurementType,
-                selector: measurements.measurementType
+                selector: (row, _) => row[measurements.measurementType]
             }
             newColumns.push(newColumn)
         });
@@ -34,7 +34,7 @@ export default function MeasurementDataDisplay({ stationId, ...props }) {
         const data = {};
 
         json.forEach(measurementsGroup => {
-            const type = measurementsGroup.measurementType
+            const type = measurementsGroup.measurementType;
             measurementsGroup.measurements.forEach( measurement => {
                 let resultMeasurementObject = data[measurement.time];
                 if (resultMeasurementObject != null)
@@ -92,10 +92,8 @@ export default function MeasurementDataDisplay({ stationId, ...props }) {
     //Accessing this.state after calling this method can potentially return the existing value. 
     function onButtonClicked() {
         const newDisplayDataFlag = !displayData; 
-        if (newDisplayDataFlag && measurements == null) {
-
+        if (newDisplayDataFlag && measurements == null) 
             fetchMeasurementsData();
-        }
         
         setDisplayData(!displayData);
     }
