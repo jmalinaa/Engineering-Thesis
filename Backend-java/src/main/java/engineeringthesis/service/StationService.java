@@ -2,9 +2,8 @@ package engineeringthesis.service;
 
 import engineeringthesis.mapper.StationMapper;
 import engineeringthesis.model.dto.StationDTO;
-import engineeringthesis.model.jpa.Measurement;
 import engineeringthesis.model.jpa.Station;
-import engineeringthesis.repository.StationRepository;
+import engineeringthesis.repository.station.StationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -18,8 +17,8 @@ public class StationService {
     @Autowired
     public StationRepository stationRepository;
 
-    public List<StationDTO> getAllStations() {
-        return stationRepository.findAll().stream().map(StationMapper.INSTANCE::toDTO).collect(Collectors.toList());
+    public List<StationDTO> getAllStationDtos() {
+        return stationRepository.getAllStationDtos();
     }
 
     public Optional<Station> getStationById(Long id) {

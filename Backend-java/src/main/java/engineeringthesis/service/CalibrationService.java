@@ -117,7 +117,7 @@ public class CalibrationService {
     }
 
     private List<String> filterPollutionMeasurementTypes(List<String> allTypes) {
-        List<String> pollutionTypes = PollutionMeasurementType.getListOfNames();
+        List<String> pollutionTypes = PollutionMeasurementType.getListOfEnums();
         return allTypes.stream().filter(pollutionTypes::contains).collect(Collectors.toList());
     }
 

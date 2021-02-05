@@ -43,7 +43,7 @@ public class PollutionService {
 
     private List<MeasurementDetails> getMeasurementsByStationIdAndMeasurementType(long stationId, PollutionMeasurementType measurementType) {
         return em.createQuery(
-                "SELECT new engineeringthesis.model.dto.plot.MeasurementDetails(m.time, p.measurementValue) FROM pollution p JOIN p.measurement m WHERE m.station.id = :stationId AND p.measurementType = :measurementType",
+                "SELECT new engineeringthesis.model.dto.plot.MeasurementDetails(m.time, p.measurementValue) FROM pollution p JOIN p.measurement m WHERE m.station.id = :stationId AND p.measurementType = :measurementType ORDER BY m.time ASC",
                 MeasurementDetails.class)
                 .setParameter("stationId", stationId)
                 .setParameter("measurementType", measurementType)

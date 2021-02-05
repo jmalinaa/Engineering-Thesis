@@ -43,7 +43,7 @@ public class WeatherService {
 
     private List<MeasurementDetails> getMeasurementsByStationIdAndMeasurementType(long stationId, WeatherMeasurementType measurementType) {
         return em.createQuery(
-                "SELECT new engineeringthesis.model.dto.plot.MeasurementDetails(m.time, w.measurementValue) FROM weather w JOIN w.measurement m WHERE m.station.id = :stationId AND w.measurementType = :measurementType",
+                "SELECT new engineeringthesis.model.dto.plot.MeasurementDetails(m.time, w.measurementValue) FROM weather w JOIN w.measurement m WHERE m.station.id = :stationId AND w.measurementType = :measurementType ORDER BY m.time ASC",
                 MeasurementDetails.class)
                 .setParameter("stationId", stationId)
                 .setParameter("measurementType", measurementType)

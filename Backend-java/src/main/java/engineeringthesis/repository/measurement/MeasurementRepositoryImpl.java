@@ -45,16 +45,17 @@ public class MeasurementRepositoryImpl extends AbstractRepository implements Mea
                 root2.get(Measurement_.id),
                 root1.get(Measurement_.time),
                 root2.get(Measurement_.time),
-                timeToSec
+                cb.min(timeToSec)
         ));
 
         cq.where(
                 cb.and(
-                        cb.lessThanOrEqualTo(timeToSec, 300),
-                        cb.greaterThanOrEqualTo(timeToSec, -300),
+                        cb.lessThanOrEqualTo(timeToSec, 1805),
+                        cb.greaterThanOrEqualTo(timeToSec, -1800),
                         cb.equal(referenceStation.get(Station_.id), referenceStationId),
                         cb.equal(stationToCalibrate.get(Station_.id), stationToCalibrateId),
                         cb.not(cb.exists(sub))));
+        cq.groupBy(root2);
         cq.orderBy();
         return entityManager.createQuery(cq).getResultList();
     }

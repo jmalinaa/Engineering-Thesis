@@ -27,7 +27,7 @@ public class StationController {
     public ResponseEntity<String> getStations() {
         log.info("getStations invoked");
 
-        return new ResponseEntity<>(gson.toJson(stationService.getAllStations()), getHeader(), HttpStatus.OK);
+        return new ResponseEntity<>(gson.toJson(stationService.getAllStationDtos()), getHeader(), HttpStatus.OK);
     }
 
     @GetMapping(path = "/stations/{id}")

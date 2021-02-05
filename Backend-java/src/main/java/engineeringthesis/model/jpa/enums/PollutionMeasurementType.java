@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 public enum PollutionMeasurementType {
 
     PM1("Pył PM1"),
-    PM25("Pył PM2.5"),
+    PM25("Pył PM2,5"),
     PM10("Pył PM10");
 
     private final String value;
@@ -23,6 +23,14 @@ public enum PollutionMeasurementType {
         List<String> names = new ArrayList<>();
         for(PollutionMeasurementType pmt : PollutionMeasurementType.values()) {
             names.add(pmt.getValue());
+        }
+        return names;
+    }
+
+    public static List<String> getListOfEnums() {
+        List<String> names = new ArrayList<>();
+        for(PollutionMeasurementType pmt : PollutionMeasurementType.values()) {
+            names.add(pmt.name());
         }
         return names;
     }
