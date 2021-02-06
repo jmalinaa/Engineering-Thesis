@@ -15,6 +15,7 @@ function Routes() {
                         <Route exact path='/stations' component={Stations} />
                         <Route exact path='/station/:id' component={Station} />
                         <Route exact path='/stations/comparison/:id1/:id2' component={StationsComparison} />
+                        <Route exact path='/stations/comparison/:id1/:id2/:id3' component={StationsComparison} />
                     </Switch>
                 </Layout>
             )} />

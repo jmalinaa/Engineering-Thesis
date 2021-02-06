@@ -13,8 +13,8 @@ import moment from 'moment';
 import { TimeSeries } from "pondjs";
 
 export default function Chart({
-    measurementTypes, station1MeasurementData, station2MeasurementData, pickedTimeRange, 
-    onTimePeriodManualChange, stationIds, seriesList, setSeriesList, ...props }) {
+    measurementTypes, station1MeasurementData, station2MeasurementData, station3MeasurementData,
+    pickedTimeRange, onTimePeriodManualChange, stationIds, seriesList, setSeriesList, ...props }) {
 
     const styles = makeStyles();
     const [chartColumns, setChartColumns] = React.useState([]);
@@ -53,8 +53,12 @@ export default function Chart({
                 measurementTypesToDraw.push(measurementType);
                 newDataList.push(createDataStructForType(station1MeasurementData, measurementType, stationIds[0]))
                 newDataList.push(createDataStructForType(station2MeasurementData, measurementType, stationIds[1]))
-                newStylesList.push(createLinesStyles(measurementType, stationIds[0], colors[index * 2]))
-                newStylesList.push(createLinesStyles(measurementType, stationIds[1], colors[index * 2 + 1]))
+                newStylesList.push(createLinesStyles(measurementType, stationIds[0], colors[index * 3]))
+                newStylesList.push(createLinesStyles(measurementType, stationIds[1], colors[index * 3 + 1]))
+                if (station3MeasurementData != null) {
+                    newDataList.push(createDataStructForType(station3MeasurementData, measurementType, stationIds[2]))
+                    newStylesList.push(createLinesStyles(measurementType, stationIds[2], colors[index * 3 + 2]))
+                }
             }
         })
         setChartColumns(measurementTypesToDraw);
@@ -85,6 +89,7 @@ export default function Chart({
     console.log("Chart, chartColumns:", chartColumns);
     if (pickedTimeRange != null)
         console.log("StationComparison, pickedTimeRange:", pickedTimeRange.toString());
+
     return (
         <Grid container direction='row' spacing={2} >
             {measurementTypes != null &&
@@ -95,8 +100,6 @@ export default function Chart({
                         asTimePeriod={pickedTimeRange != null ? [pickedTimeRange.begin(), pickedTimeRange.end()] : null}
                         onTimePeriodManualChange={onTimePeriodManualChange}
                         colorsList={colors}
-                        station1Id={stationIds[0]}
-                        station2Id={stationIds[1]}
                     />
                 </Grid>
             }

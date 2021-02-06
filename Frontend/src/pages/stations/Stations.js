@@ -139,7 +139,10 @@ function Stations({ location, props }) {
     }
 
     function redirectToComparison() {
-        window.location = `/stations/comparison/${selectedRows[0].id}/${selectedRows[1].id}`;
+        if (selectedRowsCount == 2)
+            window.location = `/stations/comparison/${selectedRows[0].id}/${selectedRows[1].id}`;
+        else 
+        window.location = `/stations/comparison/${selectedRows[0].id}/${selectedRows[1].id}/${selectedRows[2].id}`;
     }
 
     const actions = [
@@ -160,7 +163,7 @@ function Stations({ location, props }) {
         </Tooltip>,
         <Tooltip title="Porównaj dane pomiarowe na wykresie" id={'comparisonTooltip'} key={'context-action-1'}>
             <span>
-                <IconButton onClick={() => redirectToComparison()} disabled={selectedRowsCount !== 2} >
+                <IconButton onClick={() => redirectToComparison()} disabled={selectedRowsCount !== 2 && selectedRowsCount !== 3} >
                     <CompareIcon />
                 </IconButton>
             </span>

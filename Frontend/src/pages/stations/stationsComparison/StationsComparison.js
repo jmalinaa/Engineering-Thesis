@@ -24,11 +24,14 @@ export default function StationsComparison({ ...props }) {
     const styles = makeStyles();
     const station1Id = props.match.params.id1;
     const station2Id = props.match.params.id2;
+    const station3Id = props.match.params.id3;
     const [measurementTypes, setMeasurementTypes] = React.useState(null);
     const [station1Data, setStation1Data] = React.useState(null);
     const [station2Data, setStation2Data] = React.useState(null);
+    const [station3Data, setStation3Data] = React.useState(null);
     const [station1MeasurementData, setStation1MeasurementData] = React.useState(null);
     const [station2MeasurementData, setStation2MeasurementData] = React.useState(null);
+    const [station3MeasurementData, setStation3MeasurementData] = React.useState(null);
     const [seriesList, setSeriesList] = React.useState([]);
     const [timeRangeUserChose, setTimeRangeUserChose] = React.useState(null);
     const [timeRangeDefault, setTimeRangeDefault] = React.useState(null);
@@ -71,6 +74,11 @@ export default function StationsComparison({ ...props }) {
             json => onGetSuccess(json, setStation2Data),
             error => onGetError(error, station2Id, setStation2Data)
         );
+        if (station3Id != null)
+            GET(STATION_PATH + station3Id,
+                json => onGetSuccess(json, setStation3Data),
+                error => onGetError(error, station3Id, setStation3Data)
+            );
 
         GET(ALL_MEASUREMENTS_PATH + station1Id,
             json => onGetSuccess(json, setStation1MeasurementData),     //TODO zastąpić filtrowanie nowym endpointem gdy Jasiek go doda
@@ -80,6 +88,11 @@ export default function StationsComparison({ ...props }) {
             json => onGetSuccess(json, setStation2MeasurementData),     //TODO zastąpić filtrowanie nowym endpointem gdy Jasiek go doda
             error => onGetError(error, station2Id, setStation2MeasurementData)
         );
+        if (station3Id != null)
+            GET(ALL_MEASUREMENTS_PATH + station3Id,
+                json => onGetSuccess(json, setStation3MeasurementData),     //TODO zastąpić filtrowanie nowym endpointem gdy Jasiek go doda
+                error => onGetError(error, station3Id, setStation3MeasurementData)
+            );
 
     }, [station1Id, station2Id]
     );
@@ -174,6 +187,7 @@ export default function StationsComparison({ ...props }) {
 
     let station1NameInBracket = station1Data != null ? '(' + station1Data.name + ')' : '';
     let station2NameInBracket = station2Data != null ? '(' + station2Data.name + ')' : '';
+    let station3NameInBracket = station3Data != null ? '(' + station3Data.name + ')' : '';
     //TODO dodać dane stacji pod tekstem 'Porównanie stacji o identyfikatorach...'
     //TODO dodać więcej typów wykresów, np słupkowy https://software.es.net/react-timeseries-charts/#/example/barchart
 
@@ -186,35 +200,42 @@ export default function StationsComparison({ ...props }) {
             {alertMsg == null &&
                 <Grid container direction='row' spacing={2} >
                     <Grid item xs={12}>
-                        <h2>Porównanie stacji o identyfikatorach {station1Id} {station1NameInBracket} i {station2Id} {station2NameInBracket}:</h2>
-
+                        {station3Id == null &&
+                            <h2>Porównanie stacji o identyfikatorach {station1Id} {station1NameInBracket} i {station2Id} {station2NameInBracket}:</h2>
+                        }
+                        {station3Id != null &&
+                            <h2>Porównanie stacji o identyfikatorach {station1Id} {station1NameInBracket}, {station2Id} {station2NameInBracket} i {station3Id} {station3NameInBracket}:</h2>
+                        }
                     </Grid>
                     <Grid item xs={12}>
                         <Chart
-                            stationIds={[station1Id, station2Id]}
+                            stationIds={[station1Id, station2Id, station3Id]}
                             measurementTypes={measurementTypes}
                             station1MeasurementData={station1MeasurementData}
                             station2MeasurementData={station2MeasurementData}
+                            station3MeasurementData={station3MeasurementData}
                             seriesList={seriesList}
                             setSeriesList={setSeriesList}
                             onTimePeriodManualChange={onTimePeriodManualChange}
                             pickedTimeRange={pickedTimeRange}
                         />
                     </Grid>
-                    <Grid item xs={12} container direction='row' spacing={2}>
-                        <Grid item>
-                            <DefaultSelectField
-                                field={referencialStationField}
-                                selectableValues={[station1Id, station2Id]}
-                                label="Stacja referencyjna"
-                            />
+                    {station3Id == null &&
+                        <Grid item xs={12} container direction='row' spacing={2}>
+                            <Grid item>
+                                <DefaultSelectField
+                                    field={referencialStationField}
+                                    selectableValues={[station1Id, station2Id]}
+                                    label="Stacja referencyjna"
+                                />
+                            </Grid>
+                            <Grid item>
+                                <Button variant='contained' onClick={runCorrelation} disabled={isBlankString(referencialStationField.get.value)}>
+                                    {isBlankString(referencialStationField.get.value) ? "Wybierz stację referencyjną aby przeprowadzić kalibrację" : "Przeprowadź korelację"}
+                                </Button>
+                            </Grid>
                         </Grid>
-                        <Grid item>
-                            <Button variant='contained' onClick={runCorrelation} disabled={isBlankString(referencialStationField.get.value)}>
-                                {isBlankString(referencialStationField.get.value) ? "Wybierz stację referencyjną aby przeprowadzić kalibrację" : "Przeprowadź korelację"}
-                            </Button>
-                        </Grid>
-                    </Grid>
+                    }
                     {correlation != null &&
                         <Grid item xs={6}>
                             <CorrelationTable
