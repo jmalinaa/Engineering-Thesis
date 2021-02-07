@@ -7,6 +7,9 @@ spring:
     url:
     username:
     password:
+    tomcat:
+      testOnBorrow: true
+      validationQuery: SELECT 1
   servlet:
     multipart:
       max-file-size: 10MB

@@ -56,13 +56,18 @@ public class CalibrationService {
         Map<String, double[]> measurementDifferencesMap = prepareMeasurementDifferencesData();
 
         Station newStation = stationService.createChildStation(stationToCalibrateId);
-        Map<String, Integer> maxRowAndCol = findCorrelationValues(measurementDifferencesMap);
+        List<MaxCorrelated> maxCorrelated = findCorrelationValues(measurementDifferencesMap);
 
-        for (Map.Entry<String, Integer> e : maxRowAndCol.entrySet()) {
-            double[] diffArray = measurementDifferencesMap.get(e.getKey());
-            double[] toCalibrateArray = stationToCalibrateData[e.getValue()];
+        for (MaxCorrelated mc : maxCorrelated) {
+            double[] diffArray = measurementDifferencesMap.get(mc.getRowName());
+            double[] toCalibrateArray;
+            if (mc.isFromReferenceStation()) {
+                toCalibrateArray = referenceStationData[mc.getColNum()];
+            } else {
+                toCalibrateArray = stationToCalibrateData[mc.getColNum()];
+            }
             double[] varResult = prepareResult(diffArray, toCalibrateArray);
-            saveResults(newStation, varResult, e.getValue());
+            saveResults(newStation, varResult, mc.getColNum());
         }
 
         return result;
@@ -133,7 +138,7 @@ public class CalibrationService {
         for (int i = 0; i < dataSize; i++) {
             double diff = referenceData[i] - dataToCalibrate[i];
             diffSum = diffSum.add(BigDecimal.valueOf(diff));
-            if (diff > maxDiff) {
+            if (Math.abs(maxDiff) < Math.abs(diff)) {
                 maxDiff = diff;
             }
             if (saveToDiffMap) {
@@ -148,33 +153,52 @@ public class CalibrationService {
         result.getMeanAndMaxDiffMap().put(name, new MeanAndMaxDiff(meanDiff, maxDiff));
     }
 
-    private Map<String, Integer> findCorrelationValues(Map<String, double[]> measurementDifferencesMap) {
+    private List<MaxCorrelated> findCorrelationValues(Map<String, double[]> measurementDifferencesMap) {
         SpearmansCorrelation sc = new SpearmansCorrelation();
-        double[][] correlationArray = new double[measurementDifferencesMap.size()][stationToCalibrateData.length];
-        Map<String, Integer> maxRowAndCol = new HashMap<>();
+        double[][] correlationArrayWithToCalibrate = new double[measurementDifferencesMap.size()][stationToCalibrateData.length];
+        double[][] correlationArrayWithReference = new double[measurementDifferencesMap.size()][referenceStationData.length];
+        List<MaxCorrelated> maxCorrelated = new ArrayList<>();
         int i = 0;
         for (Map.Entry<String, double[]> e : measurementDifferencesMap.entrySet()) {
+            boolean fromReference = true;
             double maxCoef = 0;
             int maxCol = -1;
             for (int j = 0; j < stationToCalibrateData.length; j++) {
                 double coef = Math.abs(sc.correlation(stationToCalibrateData[j], e.getValue()));
-                correlationArray[i][j] = coef;
+                correlationArrayWithToCalibrate[i][j] = coef;
                 if (coef > maxCoef) {
                     maxCoef = coef;
                     maxCol = j;
+                    fromReference = false;
                 }
             }
-            maxRowAndCol.put(e.getKey(), maxCol);
+
+            for (int k = 0; k < referenceStationData.length; k++) {
+                double coef = Math.abs(sc.correlation(referenceStationData[k], e.getValue()));
+                correlationArrayWithReference[i][k] = coef;
+                if (coef > maxCoef) {
+                    maxCoef = coef;
+                    maxCol = k;
+                    fromReference = true;
+                }
+            }
+            maxCorrelated.add(new MaxCorrelated(fromReference, e.getKey(), maxCol));
             i++;
         }
 
-        result.setCorrelationResult(CorrelationResult.builder()
-                .correlationValues(correlationArray)
+        result.setCorrelationResultForStationToCalibrate(CorrelationResult.builder()
+                .correlationValues(correlationArrayWithToCalibrate)
                 .rowNames(new ArrayList<>(measurementDifferencesMap.keySet()))
                 .columnNames(stationToCalibrateMeasurementTypes)
                 .build());
 
-        return maxRowAndCol;
+        result.setCorrelationResultForReferenceStation(CorrelationResult.builder()
+                .correlationValues(correlationArrayWithReference)
+                .rowNames(new ArrayList<>(measurementDifferencesMap.keySet()))
+                .columnNames(referenceStationMeasurementTypes)
+                .build());
+
+        return maxCorrelated;
     }
 
     private double[] prepareResult(double[] diffArray, double[] toCalibrateArray) {
@@ -249,9 +273,13 @@ public class CalibrationService {
             pollutionService.addPollution(Pollution.builder()
                     .measurement(measurement)
                     .measurementType(pmt)
-                    .measurementValue(varResult[i])
+                    .measurementValue(calculateFinalValue(toCalibrateData, lengthDiff, varResult, i))
                     .build());
         }
+    }
+
+    private double calculateFinalValue(double[] toCalibrateData, int lengthDiff, double[] varResult, int i) {
+        return toCalibrateData[i + lengthDiff] + (varResult[i] / 5.0);
     }
 
 }

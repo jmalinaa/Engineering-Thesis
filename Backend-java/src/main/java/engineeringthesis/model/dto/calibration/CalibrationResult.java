@@ -12,7 +12,8 @@ public class CalibrationResult {
         this.meanAndMaxDiffMap = new HashMap<>();
     }
 
-    private CorrelationResult correlationResult;
+    private CorrelationResult correlationResultForStationToCalibrate;
+    private CorrelationResult correlationResultForReferenceStation;
     private Map<String, PairOfIds> sameMeasurementTypes;
     private Map<String, MeanAndMaxDiff> meanAndMaxDiffMap;
 }
