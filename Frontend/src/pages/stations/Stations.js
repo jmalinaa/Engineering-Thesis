@@ -179,10 +179,10 @@ function Stations({ location, props }) {
             <Grid container spacing={2} justify="space-around">
                 <Grid item xs={8}>
                     <DataTable
-                        pagination
                         highlightOnHover
                         selectableRows
                         selectableRowsHighlight
+                        defaultSortField={headCells[0].selector}
                         columns={headCells}
                         data={data}
                         onSelectedRowsChange={handleSelectedRowsChange}
@@ -191,6 +191,8 @@ function Stations({ location, props }) {
                         actions={contextActions.concat(actions)}
                         contextActions={contextActions.concat(actions)}
                         contextMessage={{ singular: 'stację', plural: 'stacje', message: 'wybrano' }}
+                        pagination
+                        paginationPerPage={20}
                         paginationRowsPerPageOptions={[5, 10, 15, 20, 25, 30, 50, 100, 150, 200]}
                     />
                 </Grid>

@@ -36,7 +36,8 @@ export default function StationsComparison({ ...props }) {
     const [timeRangeUserChose, setTimeRangeUserChose] = React.useState(null);
     const [timeRangeDefault, setTimeRangeDefault] = React.useState(null);
     const [alertMsg, setAlertMsg] = React.useState(null);
-    const [correlation, setCorrelation] = React.useState(null);
+    const [correlationForStationToCalibrate, setCorrelationForStationToCalibrate] = React.useState(null);
+    const [correlationForReferenceStation, setCorrelationForReferenceStation] = React.useState(null);
     const [meanAndMaxDiffMap, setMeanAndMaxDiffMap] = React.useState(null);
     const [sameMeasurementTypes, setSameMeasurementTypes] = React.useState(null);
     const referencialStationField = useField('');
@@ -136,13 +137,14 @@ export default function StationsComparison({ ...props }) {
             console.log("StationComparison, fetch calibration SUCCESS, json: ", json);
             if (json != null) {
                 buildCorrelationTable(json.correlationResult);
-                setCorrelation(json.correlationResult);
+                setCorrelationForStationToCalibrate(json.correlationResultForStationToCalibrate);
+                setCorrelationForReferenceStation(json.correlationResultForReferenceStation);
                 setMeanAndMaxDiffMap(json.meanAndMaxDiffMap);
                 setSameMeasurementTypes(json.sameMeasurementTypes);
                 // setAlertMsg(null);
             }
             else {
-                setCorrelation(null);
+                setCorrelationForStationToCalibrate(null);
                 setAlertMsg("Nie znaleziono nazw kolumn!");
             }
         }
@@ -154,7 +156,7 @@ export default function StationsComparison({ ...props }) {
                 setAlertMsg(error.message);
             else
                 setAlertMsg(error.toString());
-            setCorrelation(null);
+            setCorrelationForStationToCalibrate(null);
         }
 
         const referencialStationId = referencialStationField.get.value;
@@ -236,14 +238,23 @@ export default function StationsComparison({ ...props }) {
                             </Grid>
                         </Grid>
                     }
-                    {correlation != null &&
-                        <Grid item xs={6}>
+                    {correlationForStationToCalibrate != null &&
+                        <Grid item xs={12}>
                             <CorrelationTable
-                                correlation={correlation}
+                                title="Wyniki korelacji dla kalibrowanej stacji"
+                                correlation={correlationForStationToCalibrate}
                             />
                         </Grid>
                     }
-                    <Grid item xs={6} container direction='column'>
+                    {correlationForReferenceStation != null &&
+                        <Grid item xs={12}>
+                            <CorrelationTable
+                                title="Wyniki korelacji dla stacji referencyjnej"
+                                correlation={correlationForReferenceStation}
+                            />
+                        </Grid>
+                    }
+                    <Grid item xs={12} container direction='column'>
                         {meanAndMaxDiffMap != null &&
                             <Grid item xs={12} container direction='column'>
                                 {Object.keys(meanAndMaxDiffMap).map((measurementType, index) => {

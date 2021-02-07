@@ -2,7 +2,7 @@ import React from "react";
 
 import DataTable from 'react-data-table-component';
 
-export default function CorrelationTable({ correlation, ...props }) {
+export default function CorrelationTable({ correlation, title, ...props }) {
 
     const columnNames = correlation.columnNames;
     const columns = createColumns(columnNames)
@@ -13,7 +13,7 @@ export default function CorrelationTable({ correlation, ...props }) {
 
     return (
         <DataTable
-            title='Wyniki korelacji'
+            title={title != null ? title : 'Wyniki korelacji'}
             pagination
             highlightOnHover
             columns={columns}
@@ -29,7 +29,7 @@ function createColumns(columnNames) {
     }))
 }
 
-function convertToObject(row, columnNames){
+function convertToObject(row, columnNames) {
     const result = {};
     row.forEach((element, index) => {
         const columnName = columnNames[index];

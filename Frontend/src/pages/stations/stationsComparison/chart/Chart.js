@@ -93,7 +93,7 @@ export default function Chart({
     return (
         <Grid container direction='row' spacing={2} >
             {measurementTypes != null &&
-                <Grid item xs={3}>
+                <Grid item xs={2}>
                     <ChartOptions
                         asCheckBoxes={measurementTypes}
                         onCheckBoxesChange={onMeasurementTypesChange}
@@ -105,7 +105,7 @@ export default function Chart({
             }
             {seriesList.length > 0 && pickedTimeRange != null &&
                 <Grid item xs={9} container direction='column'>
-                    <ChartContainer timeRange={pickedTimeRange} width={800}>
+                    <ChartContainer timeRange={pickedTimeRange} showGrid width={1600}>
                         <ChartRow height="200">
                             <YAxis id="axis1"
                                 label="wartość pomiaru"
