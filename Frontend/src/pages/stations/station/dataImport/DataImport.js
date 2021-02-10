@@ -42,10 +42,13 @@ export default function DataImport({ data, acceptableColumns, handleSubmit, ...p
     }
 
     function noDuplicates(array) {
-        for (let i = 0; i < array.length; i++)
+        for (let i = 0; i < array.length; i++) {
+            if (array[i] === '')
+                continue;
             for (let j = i + 1; j < array.length; j++)
                 if (array[i] === array[j])
                     return false;
+        }
         return true;
     }
 
@@ -54,7 +57,7 @@ export default function DataImport({ data, acceptableColumns, handleSubmit, ...p
             return false;
         if (countNonEmpty(columnMappings) < 2)
             return false;
-        return true;
+        return noDuplicates(columnMappings);
     }
 
     function createSelectFields(data) {
