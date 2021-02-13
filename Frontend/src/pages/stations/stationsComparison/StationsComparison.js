@@ -150,7 +150,7 @@ export default function StationsComparison({ ...props }) {
         }
         function onCalibrationError(error, response) {
             console.log("StationComparison, fetch calibration error: ", error);
-            if (response.status === 400)
+            if (response != null && response.status === 400)
                 setAlertMsg(`Stacje ${station1Id} ${station1NameInBracket} i ${station2Id} ${station2NameInBracket}: za mało pomiarów dla przeprowadzenia kalibracji!`);
             else if (error.message != null)
                 setAlertMsg(error.message);
@@ -233,7 +233,7 @@ export default function StationsComparison({ ...props }) {
                             </Grid>
                             <Grid item>
                                 <Button variant='contained' onClick={runCorrelation} disabled={isBlankString(referencialStationField.get.value)}>
-                                    {isBlankString(referencialStationField.get.value) ? "Wybierz stację referencyjną aby przeprowadzić kalibrację" : "Przeprowadź korelację"}
+                                    {isBlankString(referencialStationField.get.value) ? "Wybierz stację referencyjną aby przeprowadzić kalibrację" : "Przeprowadź kalibrację"}
                                 </Button>
                             </Grid>
                         </Grid>
