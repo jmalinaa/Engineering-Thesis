@@ -136,7 +136,8 @@ export default function StationsComparison({ ...props }) {
         function onCalibrationSuccess(json) {
             console.log("StationComparison, fetch calibration SUCCESS, json: ", json);
             if (json != null) {
-                buildCorrelationTable(json.correlationResult);
+                buildCorrelationTable(json.correlationResultForStationToCalibrate);
+                buildCorrelationTable(json.correlationResultForReferenceStation);
                 setCorrelationForStationToCalibrate(json.correlationResultForStationToCalibrate);
                 setCorrelationForReferenceStation(json.correlationResultForReferenceStation);
                 setMeanAndMaxDiffMap(json.meanAndMaxDiffMap);
