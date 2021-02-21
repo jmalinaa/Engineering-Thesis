@@ -18,18 +18,12 @@ import java.util.List;
 public class CalibrationResultRepositoryImpl extends AbstractRepository implements CalibrationResultRepositoryCustom {
 
     @Override
-    public List<CalibrationResultDTO> getAllForStation(Long stationId) {
-        CriteriaQuery<CalibrationResultDTO> cq = cb.createQuery(CalibrationResultDTO.class);
+    public List<CalibrationResult> getAllForStation(Long stationId) {
+        CriteriaQuery<CalibrationResult> cq = cb.createQuery(CalibrationResult.class);
         Root<CalibrationResult> root = cq.from(CalibrationResult.class);
         Join<CalibrationResult, Station> station = root.join(CalibrationResult_.station, JoinType.LEFT);
 
         cq.where(cb.equal(station.get(Station_.id), stationId));
-        cq.select(cb.construct(
-                CalibrationResultDTO.class,
-                root.get(CalibrationResult_.id),
-                root.get(CalibrationResult_.measurementType),
-                root.get(CalibrationResult_.calibrationFormula)
-        ));
 
         return entityManager.createQuery(cq).getResultList();
     }

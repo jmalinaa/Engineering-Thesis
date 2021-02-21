@@ -1,10 +1,10 @@
 package engineeringthesis.repository.calibration_result;
 
-import engineeringthesis.model.dto.CalibrationResultDTO;
+import engineeringthesis.model.jpa.CalibrationResult;
 
 import java.util.List;
 
 public interface CalibrationResultRepositoryCustom {
 
-    List<CalibrationResultDTO> getAllForStation(Long stationId);
+    List<CalibrationResult> getAllForStation(Long stationId);
 }

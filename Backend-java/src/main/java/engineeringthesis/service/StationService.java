@@ -1,6 +1,8 @@
 package engineeringthesis.service;
 
+import engineeringthesis.mapper.CalibrationResultMapper;
 import engineeringthesis.mapper.StationMapper;
+import engineeringthesis.model.dto.CalibrationResultDTO;
 import engineeringthesis.model.dto.StationDTO;
 import engineeringthesis.model.dto.StationDetails;
 import engineeringthesis.model.jpa.CalibrationResult;
@@ -35,7 +37,9 @@ public class StationService {
         Optional<Station> station = getStationById(id);
         if (station.isPresent()) {
             StationDetails stationDetails = StationMapper.INSTANCE.toDetails(station.get());
-            stationDetails.setCalibrationResults(calibrationResultRepository.getAllForStation(id));
+            List<CalibrationResultDTO> cr = calibrationResultRepository.getAllForStation(id)
+                    .stream().map(CalibrationResultMapper.INSTANCE::toDTO).collect(Collectors.toList());
+            stationDetails.setCalibrationResults(cr);
             return Optional.of(stationDetails);
         } else {
             return Optional.empty();
