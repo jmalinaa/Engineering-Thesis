@@ -8,8 +8,8 @@ export default function CalibrationFormulas({ calibrationResults }) {
         return null;
 
     const columns = [
-        { selector: 'measurementType', name: 'Typ pomiaru' },
-        { selector: 'calibrationFormula', name: 'Wzór' },
+        { selector: 'measurementType', name: 'Typ pomiaru', width:'120px'},
+        { selector: 'calibrationFormula', name: 'Wzór',  compact:true, wrap:true },
     ];
 
 
