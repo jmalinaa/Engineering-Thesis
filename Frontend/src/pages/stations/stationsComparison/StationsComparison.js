@@ -36,7 +36,6 @@ export default function StationsComparison({ ...props }) {
     const [timeRangeUserChose, setTimeRangeUserChose] = React.useState(null);
     const [timeRangeDefault, setTimeRangeDefault] = React.useState(null);
     const [alertMsg, setAlertMsg] = React.useState(null);
-    const [correlationForStationToCalibrate, setCorrelationForStationToCalibrate] = React.useState(null);
     const [correlationForReferenceStation, setCorrelationForReferenceStation] = React.useState(null);
     const [meanAndMaxDiffMap, setMeanAndMaxDiffMap] = React.useState(null);
     const [sameMeasurementTypes, setSameMeasurementTypes] = React.useState(null);
@@ -53,8 +52,6 @@ export default function StationsComparison({ ...props }) {
             console.log("Station, fetchData SUCCESS, json: ", json);
             if (json == null)
                 setAlertMsg("Nie znaleziono danych stacji o id: " + station1Id);
-            // else
-            // setAlertMsg(null);
             setter(json);
         }
         function onGetError(error, stationId, setter) {
@@ -136,16 +133,14 @@ export default function StationsComparison({ ...props }) {
         function onCalibrationSuccess(json) {
             console.log("StationComparison, fetch calibration SUCCESS, json: ", json);
             if (json != null) {
-                buildCorrelationTable(json.correlationResultForStationToCalibrate);
                 buildCorrelationTable(json.correlationResultForReferenceStation);
-                setCorrelationForStationToCalibrate(json.correlationResultForStationToCalibrate);
                 setCorrelationForReferenceStation(json.correlationResultForReferenceStation);
                 setMeanAndMaxDiffMap(json.meanAndMaxDiffMap);
                 setSameMeasurementTypes(json.sameMeasurementTypes);
                 // setAlertMsg(null);
             }
             else {
-                setCorrelationForStationToCalibrate(null);
+                setCorrelationForReferenceStation(null);
                 setAlertMsg("Nie znaleziono nazw kolumn!");
             }
         }
@@ -157,7 +152,7 @@ export default function StationsComparison({ ...props }) {
                 setAlertMsg(error.message);
             else
                 setAlertMsg(error.toString());
-            setCorrelationForStationToCalibrate(null);
+                setCorrelationForReferenceStation(null);
         }
 
         const referencialStationId = referencialStationField.get.value;
@@ -237,14 +232,6 @@ export default function StationsComparison({ ...props }) {
                                     {isBlankString(referencialStationField.get.value) ? "Wybierz stację referencyjną aby przeprowadzić kalibrację" : "Przeprowadź kalibrację"}
                                 </Button>
                             </Grid>
-                        </Grid>
-                    }
-                    {correlationForStationToCalibrate != null &&
-                        <Grid item xs={12}>
-                            <CorrelationTable
-                                title="Wyniki korelacji dla kalibrowanej stacji"
-                                correlation={correlationForStationToCalibrate}
-                            />
                         </Grid>
                     }
                     {correlationForReferenceStation != null &&

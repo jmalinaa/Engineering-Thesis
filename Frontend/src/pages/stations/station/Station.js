@@ -13,6 +13,7 @@ import {
 import GET from "../../util/REST/GET";
 import * as Papa from 'papaparse';
 import MeasurementDataDisplay from "./measurementDataDisplay/MeasurementDataDisplay";
+import CalibrationFormulas from "./calibrationFormulas";
 
 
 export default function Station(props) {
@@ -33,7 +34,6 @@ export default function Station(props) {
             if (json != null) {
                 setStationData(json);
                 setCalibrable(json.parentId == null);
-                setAlertMsg(null);
             }
             else {
                 setStationData(null);
@@ -56,7 +56,6 @@ export default function Station(props) {
             console.log("Station, fetch columns SUCCESS, json: ", json);
             if (json != null) {
                 setAcceptableColumns(json);
-                setAlertMsg(null);
             }
             else {
                 setAcceptableColumns(null);
@@ -78,7 +77,6 @@ export default function Station(props) {
     );
 
     function handleUpload(filesList) {
-        setAlertMsg(null);
         setSuccessMsg(null);
         setMeasurements([]);
         const file = filesList[0];      //assuming multipleFiles={false}
@@ -163,6 +161,11 @@ export default function Station(props) {
                     <h2>Szerokość geograficzna: {stationData.latitude}</h2>
                     <h2>Długość geograficzna: {stationData.longitude}</h2>
                     <h2>Unikalny identyfikator stacji: {stationData.id}</h2>
+                    {stationData.calibrationResults != null &&
+                        <CalibrationFormulas
+                            calibrationResults={stationData.calibrationResults}
+                        />
+                    }
                     {isCalibrable &&
                         <ReactFileReader
                             handleFiles={handleUpload}
