@@ -183,16 +183,16 @@ public class CalibrationService {
         return maxCorrelated;
     }
 
-    private double[] prepareResult(double[] diffArray, double[] toCalibrateArray) {
+    private double[] prepareResult(double[] diffArray, double[] correlatedValues) {
         double diffArrayPValue = adfTest(diffArray);
-        double toCalibrateArrayPValue = adfTest(toCalibrateArray);
+        double toCalibrateArrayPValue = adfTest(correlatedValues);
         if (diffArrayPValue > P_VALUE || toCalibrateArrayPValue > P_VALUE) {
             double[] stationaryDiffArray = makeStationary(diffArray);
-            double[] stationaryToCalibrateArray = makeStationary(toCalibrateArray);
+            double[] stationaryToCalibrateArray = makeStationary(correlatedValues);
             double[] varResult = var(stationaryToCalibrateArray, stationaryDiffArray);
             return invertTransformation(varResult);
         } else {
-            return var(diffArray, toCalibrateArray);
+            return var(diffArray, correlatedValues);
         }
     }
 
@@ -224,13 +224,13 @@ public class CalibrationService {
         code.addRCode("select <- VARselect(v1, type = 'const')");
         code.addRCode("p_selected <- unname(select$selection[1])");
         code.addRCode("model <- VAR(v1, p = p_selected, type = 'const', season = NULL, exog = NULL)");
-        code.addRCode("coefs <- model$varresult$input1");
-        code.addRCode("fitted <- fitted(model$varresult$input1$coefficients)");
+        code.addRCode("coefs <- model$varresult$input1$coefficients");
+        code.addRCode("fitted <- fitted(model$varresult$input1)");
         code.addRCode("res <- list(coefs = coefs, fitted = fitted)");
         RCaller caller = RCaller.create(code, RCallerOptions.create());
         caller.runAndReturnResult("res");
-        formulaCoefs = caller.getParser().getAsDoubleArray("res$coefs");
-        return caller.getParser().getAsDoubleArray("res$fitted");
+        formulaCoefs = caller.getParser().getAsDoubleArray("coefs");
+        return caller.getParser().getAsDoubleArray("fitted");
     }
 
     private double[] invertTransformation(double[] input) {

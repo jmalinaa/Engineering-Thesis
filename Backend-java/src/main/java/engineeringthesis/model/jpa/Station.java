@@ -1,9 +1,6 @@
 package engineeringthesis.model.jpa;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import javax.persistence.*;
 
@@ -32,6 +29,7 @@ public class Station {
     @JoinColumn(name = "parent_id", referencedColumnName = "id", unique = true)
     private Station parentStation;
 
+    @ToString.Exclude
     @OneToOne(targetEntity = Station.class, fetch = FetchType.LAZY, mappedBy = "parentStation", cascade = CascadeType.REMOVE)
     private Station childStation;
 }
