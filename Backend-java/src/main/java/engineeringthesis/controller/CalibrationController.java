@@ -1,7 +1,7 @@
 package engineeringthesis.controller;
 
 import com.google.gson.Gson;
-import engineeringthesis.model.dto.calibration.CalibrationResult;
+import engineeringthesis.model.dto.calibration.CalibrationResultDetails;
 import engineeringthesis.model.exception.TooFewMeasurementsToCalibrate;
 import engineeringthesis.service.CalibrationService;
 import lombok.extern.java.Log;
@@ -27,7 +27,7 @@ public class CalibrationController {
     public ResponseEntity<String> getCalibration(@PathVariable("stationId1") long stationId1, @PathVariable("stationId2") long stationId2) {
         log.info("getCalibration invoked");
         try {
-            CalibrationResult res = calibrationService.getCalibration(stationId1, stationId2);
+            CalibrationResultDetails res = calibrationService.getCalibration(stationId1, stationId2);
             return new ResponseEntity<>(gson.toJson(res), HttpStatus.OK);
         } catch (TooFewMeasurementsToCalibrate e) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, e.getMessage());

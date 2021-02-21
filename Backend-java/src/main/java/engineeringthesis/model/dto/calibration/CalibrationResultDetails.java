@@ -6,13 +6,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Data
-public class CalibrationResult {
+public class CalibrationResultDetails {
 
-    public CalibrationResult() {
+    public CalibrationResultDetails() {
         this.meanAndMaxDiffMap = new HashMap<>();
     }
 
-    private CorrelationResult correlationResultForStationToCalibrate;
     private CorrelationResult correlationResultForReferenceStation;
     private Map<String, PairOfIds> sameMeasurementTypes;
     private Map<String, MeanAndMaxDiff> meanAndMaxDiffMap;

@@ -7,7 +7,7 @@ import lombok.Getter;
 @AllArgsConstructor
 public class MaxCorrelated {
 
-    private final boolean fromReferenceStation;
-    private final String rowName;
-    private final int colNum;
+    private double correlationValue;
+    private final String differencesMapKeyName;
+    private final int referenceDataColNum;
 }

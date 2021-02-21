@@ -2,7 +2,10 @@ package engineeringthesis.service;
 
 import engineeringthesis.mapper.StationMapper;
 import engineeringthesis.model.dto.StationDTO;
+import engineeringthesis.model.dto.StationDetails;
+import engineeringthesis.model.jpa.CalibrationResult;
 import engineeringthesis.model.jpa.Station;
+import engineeringthesis.repository.calibration_result.CalibrationResultRepository;
 import engineeringthesis.repository.station.StationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,6 +20,9 @@ public class StationService {
     @Autowired
     public StationRepository stationRepository;
 
+    @Autowired
+    public CalibrationResultRepository calibrationResultRepository;
+
     public List<StationDTO> getAllStationDtos() {
         return stationRepository.getAllStationDtos();
     }
@@ -25,10 +31,12 @@ public class StationService {
         return stationRepository.findById(id);
     }
 
-    public Optional<StationDTO> getStationDtoById(Long id) {
+    public Optional<StationDetails> getStationDetailsById(Long id) {
         Optional<Station> station = getStationById(id);
         if (station.isPresent()) {
-            return Optional.of(StationMapper.INSTANCE.toDTO(station.get()));
+            StationDetails stationDetails = StationMapper.INSTANCE.toDetails(station.get());
+            stationDetails.setCalibrationResults(calibrationResultRepository.getAllForStation(id));
+            return Optional.of(stationDetails);
         } else {
             return Optional.empty();
         }
@@ -53,5 +61,16 @@ public class StationService {
                 .name(parentStation.getName())
                 .parentStation(parentStation)
                 .build());
+    }
+
+    public CalibrationResult addCalibrationResult(CalibrationResult newCalibrationResult) {
+        Optional<CalibrationResult> sameExisting = calibrationResultRepository.findByValues(
+                newCalibrationResult.getMeasurementType().name(), newCalibrationResult.getStation().getId());
+        if (sameExisting.isPresent()) {
+            return sameExisting.get();
+        } else {
+            calibrationResultRepository.save(newCalibrationResult);
+            return newCalibrationResult;
+        }
     }
 }

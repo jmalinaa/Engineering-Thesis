@@ -2,6 +2,7 @@ package engineeringthesis.controller;
 
 import com.google.gson.Gson;
 import engineeringthesis.model.dto.StationDTO;
+import engineeringthesis.model.dto.StationDetails;
 import engineeringthesis.model.jpa.Station;
 import engineeringthesis.service.StationService;
 import lombok.extern.java.Log;
@@ -33,7 +34,7 @@ public class StationController {
     @GetMapping(path = "/stations/{id}")
     public ResponseEntity<String> getStation(@PathVariable("id") long id) {
         log.info(String.format("getStation invoked for id: %d", id));
-        Optional<StationDTO> station = stationService.getStationDtoById(id);
+        Optional<StationDetails> station = stationService.getStationDetailsById(id);
         if(station.isPresent()) {
             return new ResponseEntity<>(gson.toJson(station.get()), getHeader(), HttpStatus.OK);
         } else {

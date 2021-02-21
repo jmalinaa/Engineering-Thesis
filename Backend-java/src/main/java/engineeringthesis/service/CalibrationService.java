@@ -5,6 +5,7 @@ import com.github.rcaller.rstuff.RCallerOptions;
 import com.github.rcaller.rstuff.RCode;
 import engineeringthesis.model.dto.calibration.*;
 import engineeringthesis.model.exception.TooFewMeasurementsToCalibrate;
+import engineeringthesis.model.jpa.CalibrationResult;
 import engineeringthesis.model.jpa.Measurement;
 import engineeringthesis.model.jpa.Pollution;
 import engineeringthesis.model.jpa.Station;
@@ -35,14 +36,15 @@ public class CalibrationService {
     private StationService stationService;
 
     private static final double P_VALUE = 0.05;
-    private final CalibrationResult result = new CalibrationResult();
+    private final CalibrationResultDetails result = new CalibrationResultDetails();
     private double[][] referenceStationData;
     private double[][] stationToCalibrateData;
     private List<String> referenceStationMeasurementTypes;
     private List<String> stationToCalibrateMeasurementTypes;
     private List<MeasurementsCompare> measurements;
+    private double[] formulaCoefs;
 
-    public CalibrationResult getCalibration(long referenceStationId, long stationToCalibrateId) throws TooFewMeasurementsToCalibrate {
+    public CalibrationResultDetails getCalibration(long referenceStationId, long stationToCalibrateId) throws TooFewMeasurementsToCalibrate {
         referenceStationMeasurementTypes = measurementRepository.getMeasurementTypesByStationId(referenceStationId);
         stationToCalibrateMeasurementTypes = measurementRepository.getMeasurementTypesByStationId(stationToCalibrateId);
         result.setSameMeasurementTypes(prepareMapOfSameMeasurementTypes());
@@ -59,15 +61,13 @@ public class CalibrationService {
         List<MaxCorrelated> maxCorrelated = findCorrelationValues(measurementDifferencesMap);
 
         for (MaxCorrelated mc : maxCorrelated) {
-            double[] diffArray = measurementDifferencesMap.get(mc.getRowName());
-            double[] toCalibrateArray;
-            if (mc.isFromReferenceStation()) {
-                toCalibrateArray = referenceStationData[mc.getColNum()];
-            } else {
-                toCalibrateArray = stationToCalibrateData[mc.getColNum()];
-            }
-            double[] varResult = prepareResult(diffArray, toCalibrateArray);
-            saveResults(newStation, varResult, mc.getColNum());
+            double[] diffArray = measurementDifferencesMap.get(mc.getDifferencesMapKeyName());
+            double[] correlatedValues;
+
+            correlatedValues = referenceStationData[mc.getReferenceDataColNum()];
+
+            double[] varResult = prepareResult(diffArray, correlatedValues);
+            saveResults(newStation, varResult, mc);
         }
 
         return result;
@@ -155,23 +155,12 @@ public class CalibrationService {
 
     private List<MaxCorrelated> findCorrelationValues(Map<String, double[]> measurementDifferencesMap) {
         SpearmansCorrelation sc = new SpearmansCorrelation();
-        double[][] correlationArrayWithToCalibrate = new double[measurementDifferencesMap.size()][stationToCalibrateData.length];
         double[][] correlationArrayWithReference = new double[measurementDifferencesMap.size()][referenceStationData.length];
         List<MaxCorrelated> maxCorrelated = new ArrayList<>();
         int i = 0;
         for (Map.Entry<String, double[]> e : measurementDifferencesMap.entrySet()) {
-            boolean fromReference = true;
             double maxCoef = 0;
             int maxCol = -1;
-            for (int j = 0; j < stationToCalibrateData.length; j++) {
-                double coef = Math.abs(sc.correlation(stationToCalibrateData[j], e.getValue()));
-                correlationArrayWithToCalibrate[i][j] = coef;
-                if (coef > maxCoef) {
-                    maxCoef = coef;
-                    maxCol = j;
-                    fromReference = false;
-                }
-            }
 
             for (int k = 0; k < referenceStationData.length; k++) {
                 double coef = Math.abs(sc.correlation(referenceStationData[k], e.getValue()));
@@ -179,18 +168,11 @@ public class CalibrationService {
                 if (coef > maxCoef) {
                     maxCoef = coef;
                     maxCol = k;
-                    fromReference = true;
                 }
             }
-            maxCorrelated.add(new MaxCorrelated(fromReference, e.getKey(), maxCol));
+            maxCorrelated.add(new MaxCorrelated(maxCoef, e.getKey(), maxCol));
             i++;
         }
-
-        result.setCorrelationResultForStationToCalibrate(CorrelationResult.builder()
-                .correlationValues(correlationArrayWithToCalibrate)
-                .rowNames(new ArrayList<>(measurementDifferencesMap.keySet()))
-                .columnNames(stationToCalibrateMeasurementTypes)
-                .build());
 
         result.setCorrelationResultForReferenceStation(CorrelationResult.builder()
                 .correlationValues(correlationArrayWithReference)
@@ -242,10 +224,13 @@ public class CalibrationService {
         code.addRCode("select <- VARselect(v1, type = 'const')");
         code.addRCode("p_selected <- unname(select$selection[1])");
         code.addRCode("model <- VAR(v1, p = p_selected, type = 'const', season = NULL, exog = NULL)");
-        code.addRCode("res <- fitted(model$varresult$input1)");
+        code.addRCode("coefs <- model$varresult$input1");
+        code.addRCode("fitted <- fitted(model$varresult$input1$coefficients)");
+        code.addRCode("res <- list(coefs = coefs, fitted = fitted)");
         RCaller caller = RCaller.create(code, RCallerOptions.create());
         caller.runAndReturnResult("res");
-        return caller.getParser().getAsDoubleArray("res");
+        formulaCoefs = caller.getParser().getAsDoubleArray("res$coefs");
+        return caller.getParser().getAsDoubleArray("res$fitted");
     }
 
     private double[] invertTransformation(double[] input) {
@@ -257,12 +242,14 @@ public class CalibrationService {
         return caller.getParser().getAsDoubleArray("res");
     }
 
-    private void saveResults(Station newStation, double[] varResult, int typeNo) {
-        double[] toCalibrateData = stationToCalibrateData[typeNo];
-        String name = stationToCalibrateMeasurementTypes.get(typeNo);
-        PollutionMeasurementType pmt = PollutionMeasurementType.valueOf(name);
+    private void saveResults(Station newStation, double[] varResult, MaxCorrelated maxCorrelated) {
+        String measurementType = maxCorrelated.getDifferencesMapKeyName();
+        int indexOfMeasuementType = stationToCalibrateMeasurementTypes.indexOf(measurementType);
+        double[] toCalibrateData = stationToCalibrateData[indexOfMeasuementType];
+        PollutionMeasurementType pmt = PollutionMeasurementType.valueOf(measurementType);
         int lengthDiff = toCalibrateData.length - varResult.length;
 
+        saveCalibrationResult(pmt, newStation, maxCorrelated.getCorrelationValue(), maxCorrelated.getReferenceDataColNum());
         for (int i = 0; i < varResult.length; i++) {
             Measurement measurement = Measurement.builder()
                     .station(newStation)
@@ -273,13 +260,42 @@ public class CalibrationService {
             pollutionService.addPollution(Pollution.builder()
                     .measurement(measurement)
                     .measurementType(pmt)
-                    .measurementValue(calculateFinalValue(toCalibrateData, lengthDiff, varResult, i))
+                    .measurementValue(calculateFinalValue(toCalibrateData, lengthDiff, varResult, i, maxCorrelated.getCorrelationValue()))
                     .build());
         }
     }
 
-    private double calculateFinalValue(double[] toCalibrateData, int lengthDiff, double[] varResult, int i) {
-        return toCalibrateData[i + lengthDiff] + (varResult[i] / 5.0);
+    private double calculateFinalValue(double[] toCalibrateData, int lengthDiff, double[] varResult, int i, double maxCorrelationValue) {
+        return toCalibrateData[i + lengthDiff] + (maxCorrelationValue * varResult[i]);
     }
 
+    private void saveCalibrationResult(PollutionMeasurementType pmt, Station station, double maxCorrelationValue, int maxCorrelatedColId) {
+         CalibrationResult calibrationResult = CalibrationResult.builder()
+                .measurementType(pmt)
+                .station(station)
+                .calibrationFormula(prepareCalibrationFormula(maxCorrelationValue, maxCorrelatedColId))
+                .build();
+
+         stationService.addCalibrationResult(calibrationResult);
+    }
+
+    private String prepareCalibrationFormula(double maxCorrelationValue, int maxCorrelatedColId) {
+        String maxCorrelatedName = referenceStationMeasurementTypes.get(maxCorrelatedColId);
+        StringBuilder b = new StringBuilder();
+        b.append("skalibrowany_pomiar_n = pomiar_n + ");
+        b.append(maxCorrelationValue);
+        b.append(" * (");
+
+        for (int i = 0; i < ((formulaCoefs.length -1 )/2); i++) {
+            if (i != 0 ) {
+                b.append(" + ");
+            }
+            b.append(String.format("referencyjny_pomiar_n-%d - pomiar_n-%d) * %f", i+1, i+1, formulaCoefs[(i*2)]));
+            b.append(String.format(" + referencyjny_pomiar_%s_n-%d * %f", maxCorrelatedName.toLowerCase(), i+1, formulaCoefs[((i*2)+1)]));
+        }
+        b.append(" + ");
+        b.append(formulaCoefs[formulaCoefs.length-1]);
+        b.append(")");
+        return b.toString();
+    }
 }
