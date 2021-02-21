@@ -1,3 +1,3 @@
-import CalibrationFormulas from './calibrationFormulas';
+import CalibrationFormulas from './CalibrationFormulas';
 
 export default CalibrationFormulas;
