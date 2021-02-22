@@ -39,6 +39,8 @@ export default function StationsComparison({ ...props }) {
     const [correlationForReferenceStation, setCorrelationForReferenceStation] = React.useState(null);
     const [meanAndMaxDiffMap, setMeanAndMaxDiffMap] = React.useState(null);
     const [sameMeasurementTypes, setSameMeasurementTypes] = React.useState(null);
+    const [calibrationInProgress, setCalibrationInProgress] = React.useState(false);
+    const [calibrationButtonDisabled, setCalibrationButtonDisabled] = React.useState(false);
     const referencialStationField = useField('');
 
     function onTimePeriodManualChange(newTimePeriod) {
@@ -129,7 +131,7 @@ export default function StationsComparison({ ...props }) {
         correlationResults.columnNames = ['agh'].concat(correlationResults.columnNames);
     }
 
-    function runCorrelation() {
+    function runCalibration() {
         function onCalibrationSuccess(json) {
             console.log("StationComparison, fetch calibration SUCCESS, json: ", json);
             if (json != null) {
@@ -137,7 +139,7 @@ export default function StationsComparison({ ...props }) {
                 setCorrelationForReferenceStation(json.correlationResultForReferenceStation);
                 setMeanAndMaxDiffMap(json.meanAndMaxDiffMap);
                 setSameMeasurementTypes(json.sameMeasurementTypes);
-                // setAlertMsg(null);
+                setCalibrationInProgress(false);
             }
             else {
                 setCorrelationForReferenceStation(null);
@@ -152,13 +154,15 @@ export default function StationsComparison({ ...props }) {
                 setAlertMsg(error.message);
             else
                 setAlertMsg(error.toString());
-                setCorrelationForReferenceStation(null);
+            setCorrelationForReferenceStation(null);
         }
 
         const referencialStationId = referencialStationField.get.value;
         const calibratedStationId = station1Id === referencialStationId ? station2Id : station1Id;
         const path = CALIBRATION_PATH.replace('{refStation}', referencialStationId) + calibratedStationId;
         GET(path, onCalibrationSuccess, onCalibrationError);
+        setCalibrationInProgress(true);
+        setCalibrationButtonDisabled(true);
     };
 
     function pickTimerange() {
@@ -228,10 +232,15 @@ export default function StationsComparison({ ...props }) {
                                 />
                             </Grid>
                             <Grid item>
-                                <Button variant='contained' onClick={runCorrelation} disabled={isBlankString(referencialStationField.get.value)}>
+                                <Button variant='contained' onClick={runCalibration} disabled={calibrationButtonDisabled || isBlankString(referencialStationField.get.value)}>
                                     {isBlankString(referencialStationField.get.value) ? "Wybierz stację referencyjną aby przeprowadzić kalibrację" : "Przeprowadź kalibrację"}
                                 </Button>
                             </Grid>
+                        </Grid>
+                    }
+                    {calibrationInProgress &&
+                        <Grid item>
+                            <Alert severity="info">Kalibracja w toku</Alert>
                         </Grid>
                     }
                     {correlationForReferenceStation != null &&

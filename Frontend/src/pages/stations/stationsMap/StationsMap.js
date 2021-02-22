@@ -15,12 +15,9 @@ const temporaryIcon = new L.Icon({
     iconRetinaUrl: require('leaflet/dist/images/marker-icon-2x.png'),
     iconUrl: require('../../../customIcons/temporary-marker-icon.png'),
     shadowUrl: require('leaflet/dist/images/marker-shadow.png'),
-    iconAnchor: null,
-    popupAnchor: null,
+    iconAnchor: [12,39],
     shadowSize: null,
     shadowAnchor: null,
-    iconSize: null,
-    className: ''
 })
 
 
